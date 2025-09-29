@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  env: {
+    ALLOWED_IPS: process.env.ALLOWED_IPS,
+    DISABLE_IP_RESTRICTION: process.env.DISABLE_IP_RESTRICTION,
+  },
 };
 
 export default nextConfig;
