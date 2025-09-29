@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+.out/
+.vercel/
+
+# OpenNext / Cloudflare build artifacts
+.open-next/
+dist/
+wrangler.toml
+.open-next-cache/
+
+# Env files and secrets
+.env*
+.dev.vars
+.local.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
