@@ -1,3 +1,10 @@
+CREATE TABLE `account_types` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`code` text NOT NULL,
+	`name_ja` text NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `account_types_code_unique` ON `account_types` (`code`);--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
