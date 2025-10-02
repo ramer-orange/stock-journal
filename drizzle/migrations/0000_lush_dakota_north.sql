@@ -1,0 +1,61 @@
+CREATE TABLE `account_types` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`code` text NOT NULL,
+	`name_ja` text NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `account_types_code_unique` ON `account_types` (`code`);--> statement-breakpoint
+CREATE TABLE `asset_types` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`code` text NOT NULL,
+	`name_ja` text NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `asset_types_code_unique` ON `asset_types` (`code`);--> statement-breakpoint
+CREATE TABLE `journals` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`user_id` text NOT NULL,
+	`account_type_id` integer NOT NULL,
+	`asset_type_id` integer NOT NULL,
+	`base_currency` text DEFAULT 'JPY' NOT NULL,
+	`name` text,
+	`code` text,
+	`display_order` integer NOT NULL,
+	`checked` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`account_type_id`) REFERENCES `account_types`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`asset_type_id`) REFERENCES `asset_types`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `trades` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`journal_id` integer NOT NULL,
+	`side` text NOT NULL,
+	`price_value` integer,
+	`price_scale` integer,
+	`quantity_value` integer,
+	`quantity_scale` integer,
+	`traded_date` text,
+	`reason` text,
+	`memo` text,
+	`display_order` integer DEFAULT 0 NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	FOREIGN KEY (`journal_id`) REFERENCES `journals`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `users` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`email` text NOT NULL,
+	`password` text NOT NULL,
+	`plan_code` text DEFAULT 'FREE' NOT NULL,
+	`status` text DEFAULT 'ACTIVE' NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL,
+	`deleted_at` integer
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);
