@@ -10,7 +10,7 @@ export const trades = sqliteTable("trades", {
   priceScale: integer("price_scale"),
   quantityValue: integer("quantity_value"),
   quantityScale: integer("quantity_scale"),
-  tradedDate: integer("traded_date", { mode: "timestamp_ms" }),
+  tradedDate: text("traded_date"),
   reason: text("reason"),
   memo: text("memo"),
   displayOrder: integer("display_order").notNull().default(0),
