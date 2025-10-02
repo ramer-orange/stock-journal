@@ -22,7 +22,8 @@
 		{
 			"binding": "stock_journal_db",
 			"database_name": "stock_journal_db",
-			"database_id": "9bc4d628-e8cb-407f-970e-c4eca51be190"
+			"database_id": "9bc4d628-e8cb-407f-970e-c4eca51be190",
+			"migrations_dir": "drizzle/migrations"
 		}
 	]
 	/**

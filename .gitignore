@@ -8,6 +8,7 @@ node_modules/
 
 # OpenNext / Cloudflare build artifacts
 .open-next/
+.wrangler/
 dist/
 wrangler.toml
 .open-next-cache/
@@ -29,3 +30,6 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+
+drizzle.config.local.ts
+tsconfig.tsbuildinfo
