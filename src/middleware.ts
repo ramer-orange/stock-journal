@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+export { auth } from "@/auth"
 
 // 許可するIPアドレスのリスト（環境変数から取得）
 function getAllowedIps(): string[] {
@@ -78,7 +79,7 @@ function isIpAllowed(ip: string): boolean {
   })
 }
 
-export function middleware(request: NextRequest) {
+export function ipMiddleware(request: NextRequest) {
   // 開発環境では制限をスキップ
   if (process.env.NODE_ENV === 'development') {
     return NextResponse.next()
@@ -116,6 +117,10 @@ export function middleware(request: NextRequest) {
 
   console.log(`Access allowed for IP: ${clientIp}`)
   return NextResponse.next()
+}
+
+export const middleware = (request: NextRequest) => {
+  return ipMiddleware(request)
 }
 
 // ミドルウェアを適用するパスを設定
