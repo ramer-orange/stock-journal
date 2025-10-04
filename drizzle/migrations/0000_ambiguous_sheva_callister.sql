@@ -48,13 +48,14 @@ CREATE TABLE `trades` (
 --> statement-breakpoint
 CREATE TABLE `users` (
 	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`password` text NOT NULL,
+	`name` text,
+	`email` text,
+	`emailVerified` text,
+	`image` text,
 	`plan_code` text DEFAULT 'FREE' NOT NULL,
 	`status` text DEFAULT 'ACTIVE' NOT NULL,
-	`created_at` integer NOT NULL,
-	`updated_at` integer NOT NULL,
+	`created_at` integer,
+	`updated_at` integer,
 	`deleted_at` integer
 );
 --> statement-breakpoint
