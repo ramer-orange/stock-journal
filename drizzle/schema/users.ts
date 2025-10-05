@@ -1,5 +1,6 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { randomUUID } from "crypto";
+import { sql } from "drizzle-orm";
 
 // ユーザーテーブル
 export const users = sqliteTable("users", {
@@ -10,7 +11,7 @@ export const users = sqliteTable("users", {
   image: text("image"),
   planCode: text("plan_code", { enum: ["FREE", "PLUS"] }).notNull().default("FREE"),
   status: text("status", { enum: ["ACTIVE", "DELETED"] }).notNull().default("ACTIVE"),
-  createdAt: integer("created_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$defaultFn(() => new Date()).$onUpdate(() => new Date()),
-  deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  deletedAt: text("deleted_at"),
 });
