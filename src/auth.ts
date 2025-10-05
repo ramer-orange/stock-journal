@@ -28,6 +28,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
         clientSecret,
       }),
     ],
+    pages: {
+      signIn: "/login",
+    },
+    callbacks: {
+      session({ session, user }) {
+        session.user.id = user.id
+        return session
+      },
+    },
     secret,
     adapter: D1Adapter(db),
   }
