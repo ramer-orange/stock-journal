@@ -33,3 +33,5 @@ Thumbs.db
 
 drizzle.config.local.ts
 tsconfig.tsbuildinfo
+
+.serena/
