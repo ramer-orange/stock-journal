@@ -54,9 +54,9 @@ CREATE TABLE `users` (
 	`image` text,
 	`plan_code` text DEFAULT 'FREE' NOT NULL,
 	`status` text DEFAULT 'ACTIVE' NOT NULL,
-	`created_at` integer,
-	`updated_at` integer,
-	`deleted_at` integer
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);
