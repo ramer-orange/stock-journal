@@ -1,6 +1,6 @@
+import { auth } from "@/auth"
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-export { auth } from "@/auth"
 
 // 許可するIPアドレスのリスト（環境変数から取得）
 function getAllowedIps(): string[] {
@@ -79,25 +79,23 @@ function isIpAllowed(ip: string): boolean {
   })
 }
 
-export function ipMiddleware(request: NextRequest) {
+/**
+ * IP制限チェック
+ */
+function checkIpRestriction(request: NextRequest): NextResponse | null {
   // 開発環境では制限をスキップ
   if (process.env.NODE_ENV === 'development') {
-    return NextResponse.next()
+    return null
   }
 
   // IP制限を無効化する場合
   if (process.env.DISABLE_IP_RESTRICTION === 'true') {
-    return NextResponse.next()
+    return null
   }
 
   const clientIp = getClientIp(request)
-  
-  // IPアドレスがログに出力されるようにする（デバッグ用）
-  console.log(`Access attempt from IP: ${clientIp}`)
 
   if (!isIpAllowed(clientIp)) {
-    console.log(`Access denied for IP: ${clientIp}`)
-    
     // アクセス拒否のレスポンスを返す
     return new NextResponse(
       JSON.stringify({
@@ -115,12 +113,43 @@ export function ipMiddleware(request: NextRequest) {
     )
   }
 
-  console.log(`Access allowed for IP: ${clientIp}`)
-  return NextResponse.next()
+  return null
 }
 
-export const middleware = (request: NextRequest) => {
-  return ipMiddleware(request)
+/**
+ * 認証が必要なパスの定義
+ * - 正規表現で柔軟に指定可能
+ */
+const protectedPathPatterns: RegExp[] = [
+  /^\/journals(?:\/|$)/,
+]
+
+function isProtectedPath(pathname: string): boolean {
+  return protectedPathPatterns.some((re) => re.test(pathname))
+}
+
+// IP制限＋認証チェック
+export async function middleware(req: NextRequest) {
+  // 1) IP制限（全リクエストに適用）
+  const ipRestrictionResponse = checkIpRestriction(req)
+  if (ipRestrictionResponse) return ipRestrictionResponse
+
+  // 2) 認証チェックは「保護対象パス」のときだけ
+  const { pathname } = req.nextUrl
+  const requiresAuth = isProtectedPath(pathname)
+
+  if (!requiresAuth) {
+    return NextResponse.next()
+  }
+
+  // セッションを見てリダイレクト判断
+  const session = await auth()
+  const isLoggedIn = session?.user?.id
+  if (!isLoggedIn) {
+    return NextResponse.redirect(new URL("/signIn", req.url))
+  }
+
+  return NextResponse.next()
 }
 
 // ミドルウェアを適用するパスを設定

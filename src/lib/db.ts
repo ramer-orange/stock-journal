@@ -8,7 +8,7 @@ export interface Env {
 
 /**
  * データベース接続
- * @returns D1Database
+ * @returns {ReturnType<typeof drizzle>}
  */
 export function connectDb() {
   const { env } = getCloudflareContext()

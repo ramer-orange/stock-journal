@@ -1,27 +1,22 @@
-import { JournalWithRelations } from "@/types/journals";
+import type { JournalWithRelations } from "@/types/journals";
 import { eq } from "drizzle-orm";
 import { journals } from "@/drizzle/schema/journals";
-import { requireRepoContext } from "@/lib/server/requireRepoContext";
+import { getRepoContext } from "@/lib/server/getRepoContext";
 
 /**
  * 記録一覧を取得
- * @returns JournalWithRelations[]
+ * @returns {Promise<JournalWithRelations[]>}
  */
 const getJournals = async (): Promise<JournalWithRelations[]> => {
-  try {
-    const { db, userId } = await requireRepoContext();
-    const data = await db.query.journals.findMany({
-      where: eq(journals.userId, userId),
-      with: {
-        accountType: true,
-        assetType: true,
-      },
-    });
-    return data as JournalWithRelations[];
-  } catch (error) {
-    console.error('Error fetching journals:', error);
-    return [];
-  }
+  const { db, userId } = await getRepoContext();
+
+  return db.query.journals.findMany({
+    where: eq(journals.userId, userId),
+    with: {
+      accountType: true,
+      assetType: true,
+    },
+  });
 }
 
 export default getJournals;
