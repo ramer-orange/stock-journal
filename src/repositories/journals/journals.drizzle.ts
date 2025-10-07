@@ -3,6 +3,10 @@ import { eq } from "drizzle-orm";
 import { journals } from "@/drizzle/schema/journals";
 import { getRepositoryContext } from "@/repositories/context";
 
+/**
+ * 記録一覧を取得
+ * @returns JournalWithRelations[]
+ */
 const getJournals = async (): Promise<JournalWithRelations[]> => {
   try {
     const { db, session } = await getRepositoryContext()

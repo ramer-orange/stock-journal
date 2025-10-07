@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
-import { getDb } from "@/lib/db";
+import { connectDb } from "@/lib/db";
 import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
 export type RepositoryContext = {
-  db: ReturnType<typeof getDb>;
+  db: ReturnType<typeof connectDb>;
   session: Session;
 };
 
@@ -14,7 +14,7 @@ export const getRepositoryContext = async (): Promise<RepositoryContext> => {
     return redirect("/signIn");
   }
 
-  const db = getDb();
+  const db = connectDb();
 
   return { db, session };
 };

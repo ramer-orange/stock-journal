@@ -3,7 +3,9 @@ import { users } from "./users";
 import { accountTypes } from "./accountTypes";
 import { assetTypes } from "./assetTypes";
 
-// 保有銘柄(大枠)テーブル
+/**
+ * 保有銘柄(大枠)テーブル
+ */
 export const journals = sqliteTable("journals", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
