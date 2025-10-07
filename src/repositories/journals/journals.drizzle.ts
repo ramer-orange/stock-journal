@@ -1,15 +1,17 @@
 import { Journal } from "@/types/journals";
-import { getDb } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { auth } from "@/auth";
 import { journals } from "@/drizzle/schema/journals";
+import { getRepositoryContext } from "@/repositories/context";
 
 const getJournals = async (): Promise<Journal[]> => {
   try {
-    const db = getDb()
-    const session = await auth()
+    const { db, session } = await getRepositoryContext()
+    const userId = session.user?.id
+    if (!userId) {
+      return [];
+    }
     const data = await db.query.journals.findMany({
-      where: eq(journals.userId, session?.user?.id ?? ""),
+      where: eq(journals.userId, userId),
     });
     return data as Journal[];
   } catch (error) {
