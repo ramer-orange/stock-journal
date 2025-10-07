@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/drizzle/*": ["./drizzle/*"],
+      "@/types/*": ["./src/types/*"]
     },
     "types": [
         "./cloudflare-env.d.ts",

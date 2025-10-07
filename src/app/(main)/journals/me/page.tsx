@@ -6,8 +6,7 @@ const me = async () => {
   if (!session) {
     return redirect('/signIn')
   } else {
-    const user = session.user
-    return redirect(`/journals/${user?.id}`)
+    return redirect(`/journals`)
   }
 }
 
