@@ -1,20 +1,19 @@
 import { auth } from "@/auth";
 import { connectDb } from "@/lib/db";
-import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
-export type RepositoryContext = {
+export type RepoContext = {
   db: ReturnType<typeof connectDb>;
-  session: Session;
+  userId: string;
 };
 
-export const getRepositoryContext = async (): Promise<RepositoryContext> => {
+export const requireRepoContext = async (): Promise<RepoContext> => {
   const session = await auth();
-  if (!session) {
+  const userId = session?.user?.id;
+  if (!userId) {
     return redirect("/signIn");
   }
 
   const db = connectDb();
-
-  return { db, session };
+  return { db, userId };
 };

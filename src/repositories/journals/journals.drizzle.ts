@@ -1,7 +1,7 @@
 import { JournalWithRelations } from "@/types/journals";
 import { eq } from "drizzle-orm";
 import { journals } from "@/drizzle/schema/journals";
-import { getRepositoryContext } from "@/repositories/context";
+import { requireRepoContext } from "@/lib/server/requireRepoContext";
 
 /**
  * 記録一覧を取得
@@ -9,11 +9,7 @@ import { getRepositoryContext } from "@/repositories/context";
  */
 const getJournals = async (): Promise<JournalWithRelations[]> => {
   try {
-    const { db, session } = await getRepositoryContext()
-    const userId = session.user?.id
-    if (!userId) {
-      return [];
-    }
+    const { db, userId } = await requireRepoContext();
     const data = await db.query.journals.findMany({
       where: eq(journals.userId, userId),
       with: {
