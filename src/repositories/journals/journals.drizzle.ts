@@ -1,9 +1,9 @@
-import { Journal } from "@/types/journals";
+import { JournalWithRelations } from "@/types/journals";
 import { eq } from "drizzle-orm";
 import { journals } from "@/drizzle/schema/journals";
 import { getRepositoryContext } from "@/repositories/context";
 
-const getJournals = async (): Promise<Journal[]> => {
+const getJournals = async (): Promise<JournalWithRelations[]> => {
   try {
     const { db, session } = await getRepositoryContext()
     const userId = session.user?.id
@@ -12,8 +12,12 @@ const getJournals = async (): Promise<Journal[]> => {
     }
     const data = await db.query.journals.findMany({
       where: eq(journals.userId, userId),
+      with: {
+        accountType: true,
+        assetType: true,
+      },
     });
-    return data as Journal[];
+    return data as JournalWithRelations[];
   } catch (error) {
     console.error('Error fetching journals:', error);
     return [];

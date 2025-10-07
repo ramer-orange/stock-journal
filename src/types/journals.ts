@@ -1,13 +1,11 @@
-export interface Journal {
-  id: number;
-  userId: string;
-  accountTypeId: number;
-  assetTypeId: number;
-  baseCurrency: "JPY" | "USD";
-  name: string | null;
-  code: string | null;
-  displayOrder: number;
-  checked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { journals } from "@/drizzle/schema/journals";
+import type { AccountTypeRow } from "@/types/accountTypes";
+import type { AssetTypeRow } from "@/types/assetTypes";
+
+export type JournalRow = typeof journals.$inferSelect;
+
+export type JournalWithRelations =
+  JournalRow & {
+    accountType: AccountTypeRow;
+    assetType: AssetTypeRow;
+  };

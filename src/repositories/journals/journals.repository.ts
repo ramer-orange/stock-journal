@@ -1,6 +1,6 @@
 
-import { Journal } from "@/types/journals";
+import { JournalWithRelations } from "@/types/journals";
 
 export interface JournalsRepository {
-  getJournals: () => Promise<Journal[]>;
+  getJournals: () => Promise<JournalWithRelations[]>;
 }
