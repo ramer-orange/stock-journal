@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/drizzle/*": ["./drizzle/*"],
+      "@/types/*": ["./src/types/*"]
     },
     "types": [
         "./cloudflare-env.d.ts",
@@ -27,5 +29,5 @@
     ]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "scripts/**/*"]
 }
