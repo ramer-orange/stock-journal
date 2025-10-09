@@ -18,8 +18,6 @@ const main = async () => {
   const db = drizzle(sqlite, { schema });
 
   const testUserId = "3787e5c6-8377-491f-b253-2377b4db2680";
-  const accountTypeId = 1;
-  const assetTypeId = 1;
 
   await db
     .insert(users)
@@ -32,27 +30,46 @@ const main = async () => {
 
   await db
     .insert(accountTypes)
-    .values({
-      id: accountTypeId,
-      code: "TAXABLE",
-      nameJa: "特定",
-    })
+    .values([
+      {
+        id: 1,
+        code: "TOKUTEI",
+        nameJa: "特定",
+      },
+      {
+        id: 2,
+        code: "NISA",
+        nameJa: "NISA",
+      }
+    ])
     .onConflictDoNothing();
 
   await db
     .insert(assetTypes)
-    .values({
-      id: assetTypeId,
-      code: "STOCK",
-      nameJa: "株",
-    })
+    .values([
+      {
+        id: 1,
+        code: "STOCK",
+        nameJa: "株",
+      },
+      {
+        id: 2,
+        code: "FUND",
+        nameJa: "投信",
+      },
+      {
+        id: 3,
+        code: "ETF",
+        nameJa: "ETF",
+      }
+    ])
     .onConflictDoNothing();
 
   await db.insert(journals).values([
     {
       userId: testUserId,
-      accountTypeId,
-      assetTypeId,
+      accountTypeId: 1,
+      assetTypeId: 1,
       baseCurrency: "JPY",
       name: "メタプラ",
       code: "3350",
@@ -61,8 +78,8 @@ const main = async () => {
     },
     {
       userId: testUserId,
-      accountTypeId,
-      assetTypeId,
+      accountTypeId: 2,
+      assetTypeId: 2,
       baseCurrency: "USD",
       name: "NVIDIA",
       code: "NVDA",

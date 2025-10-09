@@ -12,15 +12,29 @@ CREATE TABLE `asset_types` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `asset_types_code_unique` ON `asset_types` (`code`);--> statement-breakpoint
+CREATE TABLE `users` (
+	`id` text PRIMARY KEY NOT NULL,
+	`name` text,
+	`email` text,
+	`emailVerified` text,
+	`image` text,
+	`plan_code` text DEFAULT 'FREE' NOT NULL,
+	`status` text DEFAULT 'ACTIVE' NOT NULL,
+	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`deleted_at` text
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `journals` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`user_id` text NOT NULL,
-	`account_type_id` integer NOT NULL,
-	`asset_type_id` integer NOT NULL,
-	`base_currency` text DEFAULT 'JPY' NOT NULL,
+	`account_type_id` integer,
+	`asset_type_id` integer,
+	`base_currency` text DEFAULT 'JPY',
 	`name` text,
 	`code` text,
-	`display_order` integer NOT NULL,
+	`display_order` integer DEFAULT 0 NOT NULL,
 	`checked` integer DEFAULT false NOT NULL,
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
@@ -29,6 +43,8 @@ CREATE TABLE `journals` (
 	FOREIGN KEY (`asset_type_id`) REFERENCES `asset_types`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE INDEX `journals_user_created_at_idx` ON `journals` (`user_id`,`created_at`);--> statement-breakpoint
+CREATE UNIQUE INDEX `journals_user_display_order_idx` ON `journals` (`user_id`,`display_order`);--> statement-breakpoint
 CREATE TABLE `trades` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`journal_id` integer NOT NULL,
@@ -45,18 +61,3 @@ CREATE TABLE `trades` (
 	`updated_at` integer NOT NULL,
 	FOREIGN KEY (`journal_id`) REFERENCES `journals`(`id`) ON UPDATE no action ON DELETE cascade
 );
---> statement-breakpoint
-CREATE TABLE `users` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text,
-	`email` text,
-	`emailVerified` text,
-	`image` text,
-	`plan_code` text DEFAULT 'FREE' NOT NULL,
-	`status` text DEFAULT 'ACTIVE' NOT NULL,
-	`created_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`updated_at` text DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	`deleted_at` text
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);
