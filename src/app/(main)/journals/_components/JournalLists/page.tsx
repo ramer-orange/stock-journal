@@ -17,7 +17,7 @@ export default function JournalLists({ journals }: Props) {
   const [assetType, setAssetType] = useState(journals[0].assetType.nameJa ?? "")
   const [checked, setChecked] = useState(journals[0].checked)
 
-  const [state, formAction, isPending] = useActionState(upsertJournalAction, null);
+  const [, formAction, isPending] = useActionState(upsertJournalAction, null);
 
   return (
     <div>
@@ -34,7 +34,7 @@ export default function JournalLists({ journals }: Props) {
             </label>
             <label>
               <span>通貨</span>
-              <input type="text" name="baseCurrency" value={journal.baseCurrency ?? baseCurrency} onChange={(e) => setBaseCurrency(e.target.value as "JPY" | "USD")} />
+              <input type="text" name="baseCurrency" value={journal.baseCurrency ?? baseCurrency} onChange={(e) => setBaseCurrency(e.target.value as "JPY" | "USD") } />
             </label>
             <label>
               <span>口座タイプ</span>
