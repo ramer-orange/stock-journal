@@ -3,10 +3,11 @@ import JournalLists from "@/app/(main)/journals/_components/JournalLists/page";
 
 const journalsPage = async () => {
   const journals = await getJournalsRepo().getJournals();
+
   return (
     <div>
       <div>journals</div>
-      <JournalLists journals={journals} />
+      <JournalLists getJournals={journals} />
     </div>
   )
 }
