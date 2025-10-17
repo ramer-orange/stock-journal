@@ -54,32 +54,36 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
 };
 
 /**
- * 記録を upsert。id があれば更新、無ければ新規作成。
- * @param {FormData} formData
- * @returns {Promise<JournalWithRelations>}
+ * journalを upsert
+ * @param {JournalWithRelations} journalData - Journal data
+ * @returns {Promise<void>}
  */
-export const upsertJournal = async (formData: FormData): Promise<JournalWithRelations> => {
+export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
-  const { id, ...data } = formSchema.parse(formData);
 
-  // 更新処理
-  if (id) {
-    const [updated] = await db
-      .update(journals)
-      .set(data)
-      .where(and(eq(journals.id, id), eq(journals.userId, userId)))
-      .returning({ id: journals.id });
+  // DBに存在するかチェック（所有者確認も兼ねる）
+  const existingJournal = journalData.id
+    ? await db.query.journals.findFirst({
+        where: and(eq(journals.id, journalData.id), eq(journals.userId, userId)),
+      })
+    : null;
 
-    if (!updated) throw new Error("ジャーナルが見つかりません");
-    return fetchJournalById(db, updated.id, userId);
+  if (existingJournal) {
+    // 更新：既存レコードがある場合
+    await db
+      .insert(journals)
+      .values({ ...journalData, userId })
+      .onConflictDoUpdate({
+        target: journals.id,
+        set: {
+          ...journalData,
+          userId,
+          updatedAt: new Date()
+        },
+      });
+  } else {
+    // 新規作成：id を除外して挿入
+    const { id, ...dataWithoutId } = journalData;
+    await db.insert(journals).values({ ...dataWithoutId, userId });
   }
-
-  // 新規作成処理
-  const [inserted] = await db
-    .insert(journals)
-    .values({ ...data, userId })
-    .returning({ id: journals.id });
-
-  if (!inserted) throw new Error("Failed to create journal");
-  return fetchJournalById(db, inserted.id, userId);
 };

@@ -1,21 +1,20 @@
 'use client'
 
 import { JournalWithRelations } from "@/types/journals";
-import { useState } from "react";
-import { useActionState } from 'react';
+import { useEffect, useState, useRef } from "react";
 import { upsertJournalAction } from "@/app/(main)/journals/actions";
+import { useDebounce } from "use-debounce";
 
 type Props = {
   getJournals: JournalWithRelations[],
 };
 
 export default function JournalLists({ getJournals }: Props) {
-  // const [journalArray, setJournalArray] = useState(getJournals);
-
-  const [state, formAction, isPending] = useActionState(upsertJournalAction, null);
   const [allJournals, setAllJournals] = useState(getJournals);
+  const changeJournalId = useRef(0);
+  const isFirstRender = useRef(true)
 
-
+  // Journal新規追加時の初期値を設定
   const addJournal = () => {
     setAllJournals([...allJournals, {
       id: allJournals.length + 1,
@@ -34,11 +33,34 @@ export default function JournalLists({ getJournals }: Props) {
     }]);
   }
 
-  const updateJournal = (id: number, field: string, value: string | number | boolean | null) => {
+
+  const handleUpdateJournal = (id: number, field: string, value: string | number | boolean | null) => {
     setAllJournals(allJournals.map((journal) =>
       journal.id === id ? { ...journal, [field]: value }: journal
     ));
+    // 変更したJournalIDを更新
+    changeJournalId.current = id;
   }
+
+  // デバウンス処理で保存
+  const [debouncedJournal] = useDebounce(
+    allJournals.find((journal) => journal.id === changeJournalId.current),
+    500
+  );
+  useEffect(() => {
+    // 初回レンダリング時は保存処理は行わない
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    // undefinedの場合は保存しない
+    if (!debouncedJournal) {
+      return;
+    }
+
+    upsertJournalAction(debouncedJournal);
+  }, [debouncedJournal]);
+
 
   return (
     <div>
@@ -46,35 +68,33 @@ export default function JournalLists({ getJournals }: Props) {
         <button onClick={addJournal}>記録を追加</button>
       </div>
       {allJournals.map((journal) => (
+        console.log('journal',journal),
         <div key={journal.id}>
-          <form action={formAction}>
+          <form>
             <label>
               <span>名前</span>
-              <input type="text" name="name" value={journal.name ?? ""} onChange={(e) => updateJournal(journal.id, "name", e.target.value)} />
+              <input type="text" name="name" value={journal.name ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "name", e.target.value)} />
             </label>
             <label>
               <span>コード</span>
-              <input type="text" name="code" value={journal.code ?? ""} onChange={(e) => updateJournal(journal.id, "code", e.target.value)} />
+              <input type="text" name="code" value={journal.code ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "code", e.target.value)} />
             </label>
             <label>
               <span>通貨</span>
-              <input type="text" name="baseCurrency" value={journal.baseCurrency ?? ""} onChange={(e) => updateJournal(journal.id, "baseCurrency", e.target.value)} />
+              <input type="text" name="baseCurrency" value={journal.baseCurrency ?? "JPY"} onChange={(e) => handleUpdateJournal(journal.id, "baseCurrency", e.target.value)} />
             </label>
             <label>
               <span>口座タイプ</span>
-              <input type="text" name="accountType" value={journal.accountType.nameJa ?? ""} onChange={(e) => updateJournal(journal.id, "accountType.nameJa", e.target.value)} />
+              <input type="text" name="accountType" value={journal.accountType?.nameJa ?? null} onChange={(e) => handleUpdateJournal(journal.id, "accountType.nameJa", e.target.value)} />
             </label>
             <label>
               <span>投資タイプ</span>
-              <input type="text" name="assetType" value={journal.assetType.nameJa ?? ""} onChange={(e) => updateJournal(journal.id, "assetType.nameJa", e.target.value)} />
+              <input type="text" name="assetType" value={journal.assetType?.nameJa ?? null} onChange={(e) => handleUpdateJournal(journal.id, "assetType.nameJa", e.target.value)} />
             </label>
             <label>
               <span>チェック</span>
-                <input type="checkbox" name="checked" checked={journal.checked} onChange={(e) => updateJournal(journal.id, "checked", e.target.checked)} />
+                <input type="checkbox" name="checked" checked={journal.checked} onChange={(e) => handleUpdateJournal(journal.id, "checked", e.target.checked)} />
             </label>
-            <button type="submit">
-              {isPending ? "保存中..." : "保存"}
-            </button>
           </form>
         </div>
       ))}
