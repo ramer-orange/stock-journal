@@ -57,8 +57,20 @@ export default function JournalLists({ getJournals }: Props) {
     if (!debouncedJournal) {
       return;
     }
-
-    upsertJournalAction(debouncedJournal);
+    
+    const saveJournal = async () => {
+      const result = await upsertJournalAction(debouncedJournal);
+      if (!result.success && result.errors) {
+        setAllJournals(prevJournals => prevJournals.map(journal =>
+          journal.id === debouncedJournal.id ? { ...journal, errors: result.errors }: journal
+        ));
+      } else {
+        setAllJournals(prevJournals => prevJournals.map(journal =>
+          journal.id === debouncedJournal.id ? { ...journal, errors: undefined }: journal
+        ));
+      }
+    }
+    saveJournal();
   }, [debouncedJournal]);
 
 
@@ -68,32 +80,37 @@ export default function JournalLists({ getJournals }: Props) {
         <button onClick={addJournal}>記録を追加</button>
       </div>
       {allJournals.map((journal) => (
-        console.log('journal',journal),
         <div key={journal.id}>
           <form>
             <label>
               <span>名前</span>
               <input type="text" name="name" value={journal.name ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "name", e.target.value)} />
+              <div>{journal.errors?.name?.join(", ")}</div>
             </label>
             <label>
               <span>コード</span>
               <input type="text" name="code" value={journal.code ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "code", e.target.value)} />
+              <div>{journal.errors?.code?.join(", ")}</div>
             </label>
             <label>
               <span>通貨</span>
               <input type="text" name="baseCurrency" value={journal.baseCurrency ?? "JPY"} onChange={(e) => handleUpdateJournal(journal.id, "baseCurrency", e.target.value)} />
+              <div>{journal.errors?.baseCurrency?.join(", ")}</div>
             </label>
             <label>
               <span>口座タイプ</span>
-              <input type="text" name="accountType" value={journal.accountType?.nameJa ?? null} onChange={(e) => handleUpdateJournal(journal.id, "accountType.nameJa", e.target.value)} />
+              <input type="text" name="accountType" value={journal.accountType?.nameJa ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "accountType.nameJa", e.target.value)} />
+              <div>{journal.errors?.accountTypeId?.join(", ")}</div>
             </label>
             <label>
               <span>投資タイプ</span>
-              <input type="text" name="assetType" value={journal.assetType?.nameJa ?? null} onChange={(e) => handleUpdateJournal(journal.id, "assetType.nameJa", e.target.value)} />
+              <input type="text" name="assetType" value={journal.assetType?.nameJa ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "assetType.nameJa", e.target.value)} />
+              <div>{journal.errors?.assetTypeId?.join(", ")}</div>
             </label>
             <label>
               <span>チェック</span>
                 <input type="checkbox" name="checked" checked={journal.checked} onChange={(e) => handleUpdateJournal(journal.id, "checked", e.target.checked)} />
+                <div>{journal.errors?.checked?.join(", ")}</div>
             </label>
           </form>
         </div>

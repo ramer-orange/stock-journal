@@ -3,37 +3,23 @@ import type { JournalWithRelations } from "@/types/journals";
 import { and, eq } from "drizzle-orm";
 import { getRepoContext } from "@/lib/server/getRepoContext";
 import { journals } from "@/drizzle/schema/journals";
-import { zfd } from "zod-form-data";
 import { z } from "zod";
+import { ja } from "zod/locales"
 
-/** FormData を DB に保存する型に変換するスキーマ */
-const formSchema = zfd.formData({
-  id: zfd.numeric(z.number().int().positive()).optional(),
-  accountTypeId: zfd.numeric(z.number().int().positive()).optional().nullable(),
-  assetTypeId: zfd.numeric(z.number().int().positive()).optional().nullable(),
-  baseCurrency: zfd
-    .text(z.enum(["USD", "JPY"]))
-    .optional()
-    .transform((v) => v?.trim().toUpperCase() as "USD" | "JPY"),
-  name: zfd.text().optional().nullable(),
-  code: zfd.text().optional().nullable(),
-  displayOrder: zfd.numeric(z.number().int().nonnegative()).catch(0),
-  checked: zfd.checkbox().catch(false),
+/** Journal データのバリデーションスキーマ */
+const journalInputSchema = z.object({
+  id: z.number().int().positive().optional(),
+  accountTypeId: z.number().int().positive().nullable().optional(),
+  assetTypeId: z.number().int().positive().nullable().optional(),
+  baseCurrency: z.enum(["USD", "JPY"]).optional(),
+  name: z.string().max(255).nullable().optional(),
+  code: z.string().max(255).nullable().optional(),
+  displayOrder: z.number().int(),
+  checked: z.boolean(),
 });
 
-/** ID でジャーナルを取得（リレーション付き） */
-const fetchJournalById = async (
-  db: RepoContext["db"],
-  id: number,
-  userId: string,
-): Promise<JournalWithRelations> => {
-  const journal = await db.query.journals.findFirst({
-    where: and(eq(journals.id, id), eq(journals.userId, userId)),
-    with: { accountType: true, assetType: true },
-  });
-  if (!journal) throw new Error("ジャーナルが見つかりません");
-  return journal as JournalWithRelations;
-};
+// 日本語化
+z.config(ja());
 
 /**
  * 記録一覧を取得
@@ -61,10 +47,30 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
 export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
 
+  // バリデーション実行
+  const validationResult = journalInputSchema.safeParse({
+    id: journalData.id,
+    accountTypeId: journalData.accountTypeId,
+    assetTypeId: journalData.assetTypeId,
+    baseCurrency: journalData.baseCurrency,
+    name: journalData.name,
+    code: journalData.code,
+    displayOrder: journalData.displayOrder,
+    checked: journalData.checked,
+  });
+
+  if (!validationResult.success) {
+    return {
+      errors: z.flattenError(validationResult.error)
+    }
+  }
+
+  const validatedData = validationResult.data;
+
   // DBに存在するかチェック（所有者確認も兼ねる）
-  const existingJournal = journalData.id
+  const existingJournal = validatedData.id
     ? await db.query.journals.findFirst({
-        where: and(eq(journals.id, journalData.id), eq(journals.userId, userId)),
+        where: and(eq(journals.id, validatedData.id), eq(journals.userId, userId)),
       })
     : null;
 
@@ -72,18 +78,18 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
     // 更新：既存レコードがある場合
     await db
       .insert(journals)
-      .values({ ...journalData, userId })
+      .values({ ...validatedData, userId })
       .onConflictDoUpdate({
         target: journals.id,
         set: {
-          ...journalData,
+          ...validatedData,
           userId,
           updatedAt: new Date()
         },
       });
   } else {
     // 新規作成：id を除外して挿入
-    const { id, ...dataWithoutId } = journalData;
+    const { id, ...dataWithoutId } = validatedData;
     await db.insert(journals).values({ ...dataWithoutId, userId });
   }
 };
