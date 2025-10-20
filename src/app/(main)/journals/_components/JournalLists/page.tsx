@@ -1,8 +1,8 @@
 'use client'
 
-import { JournalClient} from "@/types/journals";
+import { JournalClient } from "@/types/journals";
 import { useEffect, useState, useRef } from "react";
-import { upsertJournalAction } from "@/app/(main)/journals/actions";
+import { upsertJournalAction, deleteJournalAction } from "@/app/(main)/journals/actions";
 import { useDebounce } from "use-debounce";
 
 type Props = {
@@ -10,9 +10,12 @@ type Props = {
 };
 
 export default function JournalLists({ getJournals }: Props) {
-  const [allJournals, setAllJournals] = useState(getJournals);
+  const [allJournals, setAllJournals] = useState<JournalClient[]>(
+    getJournals.map((journal) => ({ ...journal, isPersisted: true }))
+  );
   const changeJournalId = useRef(0);
   const isFirstRender = useRef(true)
+  const [actionError, setActionError] = useState<Record<number, string[]>>({}); //フォーム全体に関わるエラーステート
 
   // Journal新規追加時の初期値を設定
   const addJournal = () => {
@@ -64,10 +67,15 @@ export default function JournalLists({ getJournals }: Props) {
         setAllJournals(prevJournals => prevJournals.map(journal =>
           journal.id === debouncedJournal.id ? { ...journal, errors: result.errors }: journal
         ));
+        setActionError(prevErrors => ({ ...prevErrors, [debouncedJournal.id]: result.errors.formErrors }));
       } else {
         setAllJournals(prevJournals => prevJournals.map(journal =>
-          journal.id === debouncedJournal.id ? { ...journal, errors: undefined }: journal
+          journal.id === debouncedJournal.id ? { ...journal, errors: undefined, id: result.id }: journal
         ));
+        setActionError(prevErrors => {
+          const { [debouncedJournal.id]: _, ...rest } = prevErrors;
+          return rest;
+        });
       }
 
       // 変更したJournalIDをリセット
@@ -75,6 +83,22 @@ export default function JournalLists({ getJournals }: Props) {
     }
     saveJournal();
   }, [debouncedJournal]);
+
+  // 削除処理
+  const handleDeleteJournal = async (id: number) => {
+    const result = await deleteJournalAction(id);
+    if (!result.success) {
+      console.error(result.errors);
+      setActionError(prevErrors => ({ ...prevErrors, [id]: ["削除に失敗しました。"] }));
+    } else {
+      // エラメッセージクリア
+      setActionError(prevErrors => {
+        const { [id]: _, ...rest } = prevErrors;
+        return rest;
+      });
+      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
+    }
+  }
 
 
   return (
@@ -115,6 +139,8 @@ export default function JournalLists({ getJournals }: Props) {
                 <input type="checkbox" name="checked" checked={journal.checked} onChange={(e) => handleUpdateJournal(journal.id, "checked", e.target.checked)} />
                 <div>{journal.errors?.checked?.join(", ")}</div>
             </label>
+            <button type="button" onClick={() => handleDeleteJournal(journal.id)}>削除</button>
+            <div>{actionError?.[journal.id]?.join(", ")}</div>
           </form>
         </div>
       ))}

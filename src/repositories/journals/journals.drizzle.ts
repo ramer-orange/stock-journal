@@ -43,7 +43,7 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
  * journalを upsert
  *
  * @param {JournalWithRelations} journalData - Journal data
- * @returns {Promise<void>}
+ * @returns {Promise<{ id: number }>}
  */
 export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
@@ -77,7 +77,7 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
 
   if (existingJournal) {
     // 更新：既存レコードがある場合
-    await db
+    const rows = await db
       .insert(journals)
       .values({ ...validatedData, userId })
       .onConflictDoUpdate({
@@ -87,10 +87,30 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
           userId,
           updatedAt: new Date()
         },
-      });
+      })
+      .returning({ id: journals.id });
+
+      // 配列からidを取り出す
+      return { id: rows[0].id };
   } else {
     // 新規作成：id を除外して挿入
     const { id, ...dataWithoutId } = validatedData;
-    await db.insert(journals).values({ ...dataWithoutId, userId });
+    const rows = await db.insert(journals).values({ ...dataWithoutId, userId }).returning({ id: journals.id });
+
+    // 配列からidを取り出す
+    return { id: rows[0].id };
   }
+};
+
+/**
+ * journal削除
+ *
+ * @param id
+ */
+export const deleteJournal = async (id: number) => {
+  const { db, userId } = await getRepoContext();
+
+  const result = await db.delete(journals).where(and(eq(journals.id, id), eq(journals.userId, userId)));
+
+  return result;
 };
