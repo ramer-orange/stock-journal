@@ -1,12 +1,12 @@
 'use client'
 
-import { JournalWithRelations } from "@/types/journals";
+import { JournalClient} from "@/types/journals";
 import { useEffect, useState, useRef } from "react";
 import { upsertJournalAction } from "@/app/(main)/journals/actions";
 import { useDebounce } from "use-debounce";
 
 type Props = {
-  getJournals: JournalWithRelations[],
+  getJournals: JournalClient[],
 };
 
 export default function JournalLists({ getJournals }: Props) {
@@ -34,6 +34,7 @@ export default function JournalLists({ getJournals }: Props) {
   }
 
 
+  // upsert処理
   const handleUpdateJournal = (id: number, field: string, value: string | number | boolean | null) => {
     setAllJournals(allJournals.map((journal) =>
       journal.id === id ? { ...journal, [field]: value }: journal
@@ -41,7 +42,6 @@ export default function JournalLists({ getJournals }: Props) {
     // 変更したJournalIDを更新
     changeJournalId.current = id;
   }
-
   // デバウンス処理で保存
   const [debouncedJournal] = useDebounce(
     allJournals.find((journal) => journal.id === changeJournalId.current),
@@ -60,7 +60,7 @@ export default function JournalLists({ getJournals }: Props) {
     
     const saveJournal = async () => {
       const result = await upsertJournalAction(debouncedJournal);
-      if (!result.success && result.errors) {
+      if (!result.success) {
         setAllJournals(prevJournals => prevJournals.map(journal =>
           journal.id === debouncedJournal.id ? { ...journal, errors: result.errors }: journal
         ));
@@ -69,6 +69,9 @@ export default function JournalLists({ getJournals }: Props) {
           journal.id === debouncedJournal.id ? { ...journal, errors: undefined }: journal
         ));
       }
+
+      // 変更したJournalIDをリセット
+      changeJournalId.current = 0;
     }
     saveJournal();
   }, [debouncedJournal]);

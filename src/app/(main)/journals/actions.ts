@@ -8,9 +8,7 @@ type UpsertJournalActionResult =
   | { success: true }
   | { success: false; errors: Record<string, string[]> };
 
-export async function upsertJournalAction(
-  journalData: JournalWithRelations
-): Promise<UpsertJournalActionResult> {
+export async function upsertJournalAction(journalData: JournalWithRelations): Promise<UpsertJournalActionResult> {
   try {
     const result = await getJournalsRepo().upsertJournal(journalData);
 

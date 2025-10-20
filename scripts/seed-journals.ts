@@ -87,8 +87,6 @@ const main = async () => {
       checked: false,
     },
   ]);
-
-  console.log("Seeded journals test data.");
 };
 
 main().catch((error) => {

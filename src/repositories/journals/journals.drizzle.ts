@@ -1,4 +1,3 @@
-import type { RepoContext } from "@/lib/server/getRepoContext";
 import type { JournalWithRelations } from "@/types/journals";
 import { and, eq } from "drizzle-orm";
 import { getRepoContext } from "@/lib/server/getRepoContext";
@@ -23,6 +22,7 @@ z.config(ja());
 
 /**
  * 記録一覧を取得
+ *
  * @returns {Promise<JournalWithRelations[]>}
  */
 export const getJournals = async (): Promise<JournalWithRelations[]> => {
@@ -41,6 +41,7 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
 
 /**
  * journalを upsert
+ *
  * @param {JournalWithRelations} journalData - Journal data
  * @returns {Promise<void>}
  */

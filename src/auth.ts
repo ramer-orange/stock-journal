@@ -16,7 +16,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async () => {
     try {
       await up(db)
     } catch (error) {
-      console.log("[auth][migrate]", (error as Error)?.message ?? error)
+      console.error("[auth][migrate]", (error as Error)?.message ?? error)
     }
     migrated = true
   }

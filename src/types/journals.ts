@@ -8,13 +8,9 @@ export type JournalWithRelations =
   JournalRow & {
     accountType: AccountTypeRow;
     assetType: AssetTypeRow;
-    errors?: {
-      name?: string[];
-      code?: string[];
-      accountTypeId?: string[];
-      assetTypeId?: string[];
-      baseCurrency?: string[];
-      displayOrder?: string[];
-      checked?: string[];
-    }
+  };
+
+export type JournalClient =
+  JournalWithRelations & {
+    errors?: Record<string, string[]>;
   };
