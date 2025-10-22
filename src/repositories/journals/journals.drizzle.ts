@@ -7,7 +7,7 @@ import { ja } from "zod/locales"
 
 /** Journal データのバリデーションスキーマ */
 const journalInputSchema = z.object({
-  id: z.number().int().positive().optional(),
+  id: z.number().int().optional(),
   accountTypeId: z.number().int().positive().nullable().optional(),
   assetTypeId: z.number().int().positive().nullable().optional(),
   baseCurrency: z.enum(["USD", "JPY"]).optional(),
@@ -69,7 +69,7 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
   const validatedData = validationResult.data;
 
   // DBに存在するかチェック（所有者確認も兼ねる）
-  const existingJournal = validatedData.id
+  const existingJournal = validatedData.id && validatedData.id > 0
     ? await db.query.journals.findFirst({
         where: and(eq(journals.id, validatedData.id), eq(journals.userId, userId)),
       })
@@ -94,7 +94,7 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
       return { id: rows[0].id };
   } else {
     // 新規作成：id を除外して挿入
-    const { id, ...dataWithoutId } = validatedData;
+    const { id: _id, ...dataWithoutId } = validatedData;
     const rows = await db.insert(journals).values({ ...dataWithoutId, userId }).returning({ id: journals.id });
 
     // 配列からidを取り出す

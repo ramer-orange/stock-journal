@@ -26,7 +26,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
   // Journal新規追加時の初期値を設定
   const addJournal = () => {
     setAllJournals([...allJournals, {
-      id: allJournals.length + 1,
+      id: -Date.now(),
       name: "",
       code: "",
       baseCurrency: "JPY",
@@ -92,6 +92,17 @@ export default function JournalLists({ getJournals, masters }: Props) {
 
   // 削除処理
   const handleDeleteJournal = async (id: number) => {
+    // 負のIDは未保存レコードなので、ステートから削除する
+    if (id < 0) {
+      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
+      setActionError(prevErrors => {
+        const { [id]: _, ...rest } = prevErrors;
+        return rest;
+      });
+      return;
+    }
+
+    // 正のIDはDBに保存されているので、削除APIを呼ぶ
     const result = await deleteJournalAction(id);
     if (!result.success) {
       console.error(result.errors);
