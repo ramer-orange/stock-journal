@@ -15,7 +15,6 @@ export interface JournalsRepository {
     errors?: string[];
   }>;
 }
-
 export function getJournalsRepo(): JournalsRepository {
   return {
     getJournals,

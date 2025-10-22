@@ -4,12 +4,18 @@ import { JournalClient } from "@/types/journals";
 import { useEffect, useState, useRef } from "react";
 import { upsertJournalAction, deleteJournalAction } from "@/app/(main)/journals/actions";
 import { useDebounce } from "use-debounce";
+import { AccountType } from "@/types/accountTypes";
+import { AssetType } from "@/types/assetTypes";
 
 type Props = {
   getJournals: JournalClient[],
+  masters: {
+    accountTypes: AccountType[];
+    assetTypes: AssetType[];
+  };
 };
 
-export default function JournalLists({ getJournals }: Props) {
+export default function JournalLists({ getJournals, masters }: Props) {
   const [allJournals, setAllJournals] = useState<JournalClient[]>(
     getJournals.map((journal) => ({ ...journal, isPersisted: true }))
   );
@@ -120,18 +126,28 @@ export default function JournalLists({ getJournals }: Props) {
               <div>{journal.errors?.code?.join(", ")}</div>
             </label>
             <label>
-              <span>通貨</span>
-              <input type="text" name="baseCurrency" value={journal.baseCurrency ?? "JPY"} onChange={(e) => handleUpdateJournal(journal.id, "baseCurrency", e.target.value)} />
+              <select name="baseCurrency" id="baseCurrency" value={journal.baseCurrency ?? "JPY"} onChange={(e) => handleUpdateJournal(journal.id, "baseCurrency", e.target.value)}>
+                <option value="JPY">JPY</option>
+                <option value="USD">USD</option>
+              </select>
               <div>{journal.errors?.baseCurrency?.join(", ")}</div>
             </label>
             <label>
-              <span>口座タイプ</span>
-              <input type="text" name="accountType" value={journal.accountType?.nameJa ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "accountType.nameJa", e.target.value)} />
+              <select name="accountType" id="accountType" value={journal.accountTypeId ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "accountTypeId", e.target.value === "" ? null : Number(e.target.value))}>
+                <option value="">口座タイプ</option>
+                {masters.accountTypes.map((accountType) => (
+                  <option key={accountType.id} value={accountType.id}>{accountType.id === journal.accountType?.id ? journal.accountType.nameJa : accountType.nameJa}</option>
+                ))}
+              </select>
               <div>{journal.errors?.accountTypeId?.join(", ")}</div>
             </label>
             <label>
-              <span>投資タイプ</span>
-              <input type="text" name="assetType" value={journal.assetType?.nameJa ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "assetType.nameJa", e.target.value)} />
+              <select name="assetType" id="assetType" value={journal.assetTypeId ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "assetTypeId", e.target.value === "" ? null : Number(e.target.value))}>
+                <option value="">投資タイプ</option>
+                {masters.assetTypes.map((assetType) => (
+                  <option key={assetType.id} value={assetType.id}>{assetType.nameJa}</option>
+                ))}
+              </select>
               <div>{journal.errors?.assetTypeId?.join(", ")}</div>
             </label>
             <label>
