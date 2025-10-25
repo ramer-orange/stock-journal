@@ -46,7 +46,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
   // upsert処理
   const handleUpdateJournal = (id: number, field: string, value: string | number | boolean | null) => {
     setAllJournals(allJournals.map((journal) =>
-      journal.id === id ? { ...journal, [field]: value }: journal
+      journal.id === id ? { ...journal, [field]: value } : journal
     ));
     // 変更したJournalIDを更新
     changeJournalId.current = id;
@@ -71,12 +71,12 @@ export default function JournalLists({ getJournals, masters }: Props) {
       const result = await upsertJournalAction(debouncedJournal);
       if (!result.success) {
         setAllJournals(prevJournals => prevJournals.map(journal =>
-          journal.id === debouncedJournal.id ? { ...journal, errors: result.errors }: journal
+          journal.id === debouncedJournal.id ? { ...journal, errors: result.errors } : journal
         ));
         setActionError(prevErrors => ({ ...prevErrors, [debouncedJournal.id]: result.errors.formErrors }));
       } else {
         setAllJournals(prevJournals => prevJournals.map(journal =>
-          journal.id === debouncedJournal.id ? { ...journal, errors: undefined, id: result.id }: journal
+          journal.id === debouncedJournal.id ? { ...journal, errors: undefined, id: result.id } : journal
         ));
         setActionError(prevErrors => {
           const { [debouncedJournal.id]: _, ...rest } = prevErrors;
@@ -147,7 +147,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
               <select name="accountType" id="accountType" value={journal.accountTypeId ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "accountTypeId", e.target.value === "" ? null : Number(e.target.value))}>
                 <option value="">口座タイプ</option>
                 {masters.accountTypes.map((accountType) => (
-                  <option key={accountType.id} value={accountType.id}>{accountType.id === journal.accountType?.id ? journal.accountType.nameJa : accountType.nameJa}</option>
+                  <option key={accountType.id} value={accountType.id}>{accountType.nameJa}</option>
                 ))}
               </select>
               <div>{journal.errors?.accountTypeId?.join(", ")}</div>

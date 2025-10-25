@@ -3,7 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { getRepoContext } from "@/lib/server/getRepoContext";
 import { journals } from "@/drizzle/schema/journals";
 import { z } from "zod";
-import { ja } from "zod/locales"
+import { ja } from "zod/locales";
 
 /** Journal データのバリデーションスキーマ */
 const journalInputSchema = z.object({

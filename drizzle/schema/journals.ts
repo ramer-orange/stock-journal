@@ -1,8 +1,7 @@
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 import { users } from "./users";
 import { accountTypes } from "./accountTypes";
 import { assetTypes } from "./assetTypes";
-import { index } from "drizzle-orm/sqlite-core";
 
 /**
  * 保有銘柄(大枠)テーブル
