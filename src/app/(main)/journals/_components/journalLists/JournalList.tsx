@@ -2,10 +2,11 @@
 
 import { JournalClient } from "@/types/journals";
 import { useEffect, useState, useRef } from "react";
-import { upsertJournalAction, deleteJournalAction } from "@/app/(main)/journals/actions";
+import { upsertJournalAction, deleteJournalAction } from "@/app/(main)/journals/_actions/journalActions";
 import { useDebounce } from "use-debounce";
 import { AccountType } from "@/types/accountTypes";
 import { AssetType } from "@/types/assetTypes";
+import TradeForm from "@/app/(main)/journals/_components/trades/TradeForm";
 
 type Props = {
   getJournals: JournalClient[],
@@ -169,6 +170,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
             <button type="button" onClick={() => handleDeleteJournal(journal.id)}>削除</button>
             <div>{actionError?.[journal.id]?.join(", ")}</div>
           </form>
+          <TradeForm />
         </div>
       ))}
     </div>
