@@ -1,10 +1,9 @@
-// src/lib/server/getRepoContext.ts
 import "server-only";
 import { auth } from "@/auth";
 import { connectDb } from "@/lib/db";
 import { unauthorized } from "next/navigation";
 
-export type RepoContext = { db: ReturnType<typeof connectDb>; userId: string };
+type RepoContext = { db: ReturnType<typeof connectDb>; userId: string };
 
 /**
  * リポジトリコンテキストを取得

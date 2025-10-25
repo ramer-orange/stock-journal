@@ -1,3 +1,3 @@
 import type { accountTypes } from "@/drizzle/schema/accountTypes";
 
-export type AccountTypeRow = typeof accountTypes.$inferSelect;
+export type AccountType = typeof accountTypes.$inferSelect;
