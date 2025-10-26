@@ -7,6 +7,7 @@ import { useDebounce } from "use-debounce";
 import { AccountType } from "@/types/accountTypes";
 import { AssetType } from "@/types/assetTypes";
 import TradeForm from "@/app/(main)/journals/_components/trades/TradeForm";
+import { deleteTradeAction } from "@/app/(main)/journals/_actions/tradeActions";
 
 type Props = {
   getJournals: JournalClient[],
@@ -40,6 +41,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
       createdAt: new Date(),
       updatedAt: new Date(),
       userId: "",
+      trades: [],
     }]);
   }
 
@@ -91,31 +93,51 @@ export default function JournalLists({ getJournals, masters }: Props) {
     saveJournal();
   }, [debouncedJournal]);
 
-  // 削除処理
+  // 削除処理（Journal用）
   const handleDeleteJournal = async (id: number) => {
-    // 負のIDは未保存レコードなので、ステートから削除する
-    if (id < 0) {
-      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
-      setActionError(prevErrors => {
-        const { [id]: _, ...rest } = prevErrors;
-        return rest;
-      });
-      return;
-    }
-
-    // 正のIDはDBに保存されているので、削除APIを呼ぶ
-    const result = await deleteJournalAction(id);
-    if (!result.success) {
-      console.error(result.errors);
-      setActionError(prevErrors => ({ ...prevErrors, [id]: ["削除に失敗しました。"] }));
+    if (id >= 0) {
+      const result = await deleteJournalAction(id);
+      if (!result.success) {
+        setActionError(prevErrors => ({ ...prevErrors, [id]: result.errors || ["削除に失敗しました。"] }));
+        return;
+      }
     } else {
+      // 負のIDは未保存レコードなので、ステートから削除する
+      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
       // エラメッセージクリア
       setActionError(prevErrors => {
         const { [id]: _, ...rest } = prevErrors;
-        return rest;
-      });
-      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
+          return rest;
+        });
     }
+  }
+
+
+  // 削除処理（Trade用）
+  const handleDeleteTrade = async (journalId: number, tradeId: number) => {
+    if (tradeId >= 0) {
+      // 正のIDはDBに保存されているので、削除APIを呼ぶ
+      const result = await deleteTradeAction(tradeId);
+      if (!result.success) {
+        // 削除失敗: エラーを表示して何もしない
+        setActionError(prevErrors => ({ ...prevErrors, [tradeId]: result.errors?.formErrors || ["削除に失敗しました。"] }));
+        return;
+      }
+    }
+
+    // ステートから削除(負のIDも含む)
+    setAllJournals(prevJournals =>
+      prevJournals.map(journal =>
+        journal.id === journalId
+          ? { ...journal, trades: journal.trades.filter(trade => trade.id !== tradeId) }
+          : journal
+      )
+    );
+    // エラメッセージクリア
+    setActionError(prevErrors => {
+      const { [tradeId]: _, ...rest } = prevErrors;
+      return rest;
+    });
   }
 
 
@@ -170,7 +192,14 @@ export default function JournalLists({ getJournals, masters }: Props) {
             <button type="button" onClick={() => handleDeleteJournal(journal.id)}>削除</button>
             <div>{actionError?.[journal.id]?.join(", ")}</div>
           </form>
-          <TradeForm />
+          {journal.trades.map((trade) => (
+            <TradeForm 
+              key={trade.id} 
+              journalId={journal.id} 
+              tradeData={trade}
+              onDelete={() => handleDeleteTrade(journal.id, trade.id)}
+            />
+          ))}
         </div>
       ))}
     </div>

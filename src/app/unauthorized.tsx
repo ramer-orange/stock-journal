@@ -1,4 +1,4 @@
-import SignIn from '@/components/Auth/signIn'
+ import SignIn from '@/components/Auth/signIn'
  
 export default function UnauthorizedPage() {
   return (

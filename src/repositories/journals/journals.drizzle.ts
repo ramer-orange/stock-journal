@@ -33,6 +33,7 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
     with: {
       accountType: true,
       assetType: true,
+      trades: true,
     },
   });
 
