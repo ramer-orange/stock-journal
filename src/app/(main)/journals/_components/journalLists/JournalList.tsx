@@ -27,8 +27,9 @@ export default function JournalLists({ getJournals, masters }: Props) {
 
   // Journal新規追加時の初期値を設定
   const addJournal = () => {
+    const id = -Date.now();
     setAllJournals([...allJournals, {
-      id: -Date.now(),
+      id: id,
       name: "",
       code: "",
       baseCurrency: "JPY",
@@ -43,6 +44,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
       userId: "",
       trades: [],
     }]);
+   handleAddTrade(id);
   }
 
 
@@ -112,6 +114,30 @@ export default function JournalLists({ getJournals, masters }: Props) {
     }
   }
 
+  // 売買記録追加処理
+  const handleAddTrade = (journalId: number) => {
+    setAllJournals(prevJournals =>
+      prevJournals.map(journal =>
+        journal.id === journalId
+          ? { ...journal, trades: [...journal.trades, { 
+            id: -Date.now(),
+            journalId: journalId,
+            side: "BUY",
+            priceValue: null,
+            priceScale: null,
+            quantityValue: null,
+            quantityScale: null,
+            tradedDate: null,
+            reason: null,
+            memo: null,
+            displayOrder: journal.trades.length + 1,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }] }
+          : journal
+      )
+    );
+  }
 
   // 削除処理（Trade用）
   const handleDeleteTrade = async (journalId: number, tradeId: number) => {
@@ -148,7 +174,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
       </div>
       {allJournals.map((journal) => (
         <div key={journal.id}>
-          <form>
+          <div>
             <label>
               <span>名前</span>
               <input type="text" name="name" value={journal.name ?? ""} onChange={(e) => handleUpdateJournal(journal.id, "name", e.target.value)} />
@@ -189,17 +215,22 @@ export default function JournalLists({ getJournals, masters }: Props) {
                 <input type="checkbox" name="checked" checked={journal.checked} onChange={(e) => handleUpdateJournal(journal.id, "checked", e.target.checked)} />
                 <div>{journal.errors?.checked?.join(", ")}</div>
             </label>
-            <button type="button" onClick={() => handleDeleteJournal(journal.id)}>削除</button>
             <div>{actionError?.[journal.id]?.join(", ")}</div>
-          </form>
-          {journal.trades.map((trade) => (
-            <TradeForm 
-              key={trade.id} 
-              journalId={journal.id} 
-              tradeData={trade}
-              onDelete={() => handleDeleteTrade(journal.id, trade.id)}
-            />
-          ))}
+          </div>
+          <div>
+            <p>売買記録</p>
+            {journal.trades.map((trade) => (
+              <div key={trade.id} >
+                <TradeForm
+                  journalId={journal.id}
+                  tradeData={trade}
+                  onDelete={() => handleDeleteTrade(journal.id, trade.id)}
+                />
+              </div>
+            ))}
+            <button type="button" onClick={() => handleAddTrade(journal.id)}>売買記録を追加</button>
+          </div>
+          <button type="button" onClick={() => handleDeleteJournal(journal.id)}>削除</button>
         </div>
       ))}
     </div>

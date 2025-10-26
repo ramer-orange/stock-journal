@@ -81,38 +81,37 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
 
   return (
     <div>
-      <p>売買記録</p>
-        <form>
-          <label>
-            <span>売買日</span>
-            <input type="date" name="tradedDate" value={trade.tradedDate ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "tradedDate", e.target.value)}/>
-          </label>
-          <label>
-            <span>売買区分</span>
-            <select name="side" id="side" value={trade.side ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "side", e.target.value)}>
-              <option value="BUY">買い</option>
-              <option value="SELL">売り</option>
-            </select>
-          </label>
-          <label>
-            <span>売買単価</span>
-            <input type="number" name="priceValue" value={trade.priceValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", e.target.value)}/>
-          </label>
-          <label>
-            <span>数量</span>
-            <input type="number" name="quantityValue" value={trade.quantityValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", e.target.value)}/>
-          </label>
-          <label>
-            <span>売買理由</span>
-            <textarea name="reason" value={trade.reason ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "reason", e.target.value)}/>
-          </label>
-          <label>
-            <span>メモ</span>
-              <textarea name="memo" value={trade.memo ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "memo", e.target.value)}/>
-          </label>
-          <button type="button" onClick={handleDeleteTrade}>削除</button>
-          <div>{actionError?.[trade.id]?.join(", ")}</div>
-        </form>
+      <div>
+        <label>
+          <span>売買日</span>
+          <input type="date" name="tradedDate" value={trade.tradedDate ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "tradedDate", e.target.value)}/>
+        </label>
+        <label>
+          <span>売買区分</span>
+          <select name="side" id="side" value={trade.side ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "side", e.target.value)}>
+            <option value="BUY">買い</option>
+            <option value="SELL">売り</option>
+          </select>
+        </label>
+        <label>
+          <span>売買単価</span>
+          <input type="number" name="priceValue" value={trade.priceValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", e.target.value)}/>
+        </label>
+        <label>
+          <span>数量</span>
+          <input type="number" name="quantityValue" value={trade.quantityValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", e.target.value)}/>
+        </label>
+        <label>
+          <span>売買理由</span>
+          <textarea name="reason" value={trade.reason ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "reason", e.target.value)}/>
+        </label>
+        <label>
+          <span>メモ</span>
+            <textarea name="memo" value={trade.memo ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "memo", e.target.value)}/>
+        </label>
+        <button type="button" onClick={handleDeleteTrade}>削除</button>
+        <div>{actionError?.[trade.id]?.join(", ")}</div>
+      </div>
     </div>
   );
 }
