@@ -7,9 +7,12 @@ import { trades } from "@/drizzle/schema/trades";
 import { journals } from "@/drizzle/schema/journals";
 import { JournalRow } from "@/types/journals";
 
+// 日本語化
+z.config(ja());
+
 /** Trade データのバリデーションスキーマ */
 const tradeInputSchema = z.object({
-  id: z.number().int().optional(),
+  id: z.number().int(),
   journalId: z.number().int(),
   side: z.enum(["BUY", "SELL"]),
   priceValue: z.number().int().optional().nullable(),
@@ -25,8 +28,6 @@ const tradeInputSchema = z.object({
 /** バリデーション済みTradeデータの型 */
 type ValidatedTradeData = z.infer<typeof tradeInputSchema>;
 
-// 日本語化
-z.config(ja());
 
 /**
 * 権限チェック（journal）
@@ -40,6 +41,7 @@ export const checkPermissionJournal = async (journalId: number) => {
     where: and(eq(journals.id, journalId), eq(journals.userId, userId)),
   });
 };
+
 
 /**
  * tradeを upsert
@@ -62,24 +64,24 @@ export const upsertTrade = async (tradeData: TradeRow) => {
   }
   const validatedData = validationResult.data;
 
-  if (validatedData.journalId === undefined || validatedData.journalId < 0) {
-    const journalData = {
+  if (validatedData.journalId < 0) {
+    const journalData: JournalRow = {
       id: -Date.now(),
       userId: userId,
-      accountTypeId: null,
-      assetTypeId: null,
-      baseCurrency: null,
       name: "",
       code: "",
+      baseCurrency: "JPY",
+      accountTypeId: null,
+      assetTypeId: null,
       displayOrder: -Date.now()+1,
       checked: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    const upserted = await upsertTradeWithJournal(journalData, validatedData);
+    const result = await upsertTradeWithJournal(journalData, validatedData);
 
-    if (upserted?.tradeId) {
-      return { id: upserted.tradeId };
+    if (result?.tradeId) {
+      return { id: result.tradeId };
     }
 
     return {
@@ -97,7 +99,7 @@ export const upsertTrade = async (tradeData: TradeRow) => {
   }
 
   // DBに存在するかチェック
-  const existingTrade = validatedData.id && validatedData.id > 0
+  const existingTrade = validatedData.id > 0
     ? await db.query.trades.findFirst({
         where: and(eq(trades.id, validatedData.id), eq(trades.journalId, validatedData.journalId)),
       })
@@ -129,15 +131,15 @@ export const upsertTradeWithJournal = async (JournalData: JournalRow, validatedT
   const { id: _journalid, ...journalDataWithoutId } = JournalData;
   const { id: _tradeId, ...tradeDataWithoutId } = validatedTradeData;
 
-  // Cloudflare D1ではトランザクションが使えないため、順次挿入
   let journalId: number | undefined;
 
+  // Cloudflare D1ではトランザクションが使えないため、順次挿入
   try {
     // journal を作成
     const journalResult = await db.insert(journals).values({ ...journalDataWithoutId }).returning({ id: journals.id });
     journalId = journalResult[0].id;
 
-    // journal ID を使って trade を作成
+    // journalId を使って trade を作成
     const insertTradeData = { ...tradeDataWithoutId, journalId };
     const tradeId = await db.insert(trades).values(insertTradeData).returning({ id: trades.id });
 

@@ -103,15 +103,15 @@ export default function JournalLists({ getJournals, masters }: Props) {
         setActionError(prevErrors => ({ ...prevErrors, [id]: result.errors || ["削除に失敗しました。"] }));
         return;
       }
-    } else {
-      // 負のIDは未保存レコードなので、ステートから削除する
-      setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
-      // エラメッセージクリア
-      setActionError(prevErrors => {
-        const { [id]: _, ...rest } = prevErrors;
-          return rest;
-        });
     }
+
+    // ステートから削除
+    setAllJournals(prevJournals => prevJournals.filter(journal => journal.id !== id));
+    // エラメッセージクリア
+    setActionError(prevErrors => {
+      const { [id]: _, ...rest } = prevErrors;
+        return rest;
+      });
   }
 
   // 売買記録追加処理

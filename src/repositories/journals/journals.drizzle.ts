@@ -5,20 +5,21 @@ import { journals } from "@/drizzle/schema/journals";
 import { z } from "zod";
 import { ja } from "zod/locales";
 
+// 日本語化
+z.config(ja());
+
 /** Journal データのバリデーションスキーマ */
 const journalInputSchema = z.object({
-  id: z.number().int().optional(),
+  id: z.number().int(),
   accountTypeId: z.number().int().positive().nullable().optional(),
   assetTypeId: z.number().int().positive().nullable().optional(),
-  baseCurrency: z.enum(["USD", "JPY"]).optional(),
+  baseCurrency: z.enum(["USD", "JPY"]),
   name: z.string().max(255).nullable().optional(),
   code: z.string().max(255).nullable().optional(),
   displayOrder: z.number().int(),
   checked: z.boolean(),
 });
 
-// 日本語化
-z.config(ja());
 
 /**
  * 記録一覧を取得
@@ -48,18 +49,10 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
  */
 export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
+  console.log('journalData!!', journalData);
 
   // バリデーション実行
-  const validationResult = journalInputSchema.safeParse({
-    id: journalData.id,
-    accountTypeId: journalData.accountTypeId,
-    assetTypeId: journalData.assetTypeId,
-    baseCurrency: journalData.baseCurrency,
-    name: journalData.name,
-    code: journalData.code,
-    displayOrder: journalData.displayOrder,
-    checked: journalData.checked,
-  });
+  const validationResult = journalInputSchema.safeParse(journalData);
 
   if (!validationResult.success) {
     return {
