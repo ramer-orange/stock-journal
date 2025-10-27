@@ -5,12 +5,13 @@ import { ja } from "zod/locales";
 import { and, eq } from "drizzle-orm";
 import { trades } from "@/drizzle/schema/trades";
 import { journals } from "@/drizzle/schema/journals";
+import { JournalRow } from "@/types/journals";
 
 /** Trade データのバリデーションスキーマ */
 const tradeInputSchema = z.object({
   id: z.number().int().optional(),
-  journalId: z.number().int().positive(),
-  side: z.enum(["BUY", "SELL"]).default("BUY"),
+  journalId: z.number().int(),
+  side: z.enum(["BUY", "SELL"]),
   priceValue: z.number().int().optional().nullable(),
   priceScale: z.number().int().optional().nullable(),
   quantityValue: z.number().int().optional().nullable(),
@@ -18,7 +19,11 @@ const tradeInputSchema = z.object({
   reason: z.string().optional().nullable(),
   memo: z.string().optional().nullable(),
   tradedDate: z.string().optional().nullable(),
+  displayOrder: z.number().int().optional(),
 });
+
+/** バリデーション済みTradeデータの型 */
+type ValidatedTradeData = z.infer<typeof tradeInputSchema>;
 
 // 日本語化
 z.config(ja());
@@ -44,13 +49,6 @@ export const checkPermissionJournal = async (journalId: number) => {
  */
 export const upsertTrade = async (tradeData: TradeRow) => {
   const { db, userId } = await getRepoContext();
-
-  // 権限チェック
-  const checkedPermissionJournal = await checkPermissionJournal(tradeData.journalId);
-  if (!checkedPermissionJournal) {
-    return { errors: { formErrors: ["権限がありません。"], fieldErrors: {} } };
-  }
-
   // バリデーション実行
   const validationResult = tradeInputSchema.safeParse(tradeData);
   if (!validationResult.success) {
@@ -63,6 +61,40 @@ export const upsertTrade = async (tradeData: TradeRow) => {
     }
   }
   const validatedData = validationResult.data;
+
+  if (validatedData.journalId === undefined || validatedData.journalId < 0) {
+    const journalData = {
+      id: -Date.now(),
+      userId: userId,
+      accountTypeId: null,
+      assetTypeId: null,
+      baseCurrency: null,
+      name: "",
+      code: "",
+      displayOrder: -Date.now()+1,
+      checked: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const upserted = await upsertTradeWithJournal(journalData, validatedData);
+
+    if (upserted?.tradeId) {
+      return { id: upserted.tradeId };
+    }
+
+    return {
+      errors: {
+        formErrors: ["保存に失敗しました。"],
+        fieldErrors: {}
+      }
+    };
+  }
+
+  // 権限チェック
+  const checkedPermissionJournal = await checkPermissionJournal(tradeData.journalId);
+  if (!checkedPermissionJournal) {
+    return { errors: { formErrors: ["権限がありません。"], fieldErrors: {} } };
+  }
 
   // DBに存在するかチェック
   const existingTrade = validatedData.id && validatedData.id > 0
@@ -81,10 +113,43 @@ export const upsertTrade = async (tradeData: TradeRow) => {
   } else { // 新規作成
     const { id: _id, ...dataWithoutId } = validatedData;
     const rows = await db.insert(trades).values({ ...dataWithoutId }).returning({ id: trades.id });
-    // console.log('rows', rows);
     return { id: rows[0].id };
   }
 };
+
+/**
+ * JournalとTradeを同時にupsert
+ *
+ * @param JournalData
+ * @param validatedTradeData
+ * @returns
+ */
+export const upsertTradeWithJournal = async (JournalData: JournalRow, validatedTradeData: ValidatedTradeData) => {
+  const { db } = await getRepoContext();
+  const { id: _journalid, ...journalDataWithoutId } = JournalData;
+  const { id: _tradeId, ...tradeDataWithoutId } = validatedTradeData;
+
+  // Cloudflare D1ではトランザクションが使えないため、順次挿入
+  let journalId: number | undefined;
+
+  try {
+    // journal を作成
+    const journalResult = await db.insert(journals).values({ ...journalDataWithoutId }).returning({ id: journals.id });
+    journalId = journalResult[0].id;
+
+    // journal ID を使って trade を作成
+    const insertTradeData = { ...tradeDataWithoutId, journalId };
+    const tradeId = await db.insert(trades).values(insertTradeData).returning({ id: trades.id });
+
+    return { journalId, tradeId: tradeId[0].id };
+  } catch (error) {
+    // エラー時に作成した journal を削除（手動ロールバック）
+    if (journalId) {
+      await db.delete(journals).where(eq(journals.id, journalId));
+    }
+    throw error;
+  }
+}
 
 /**
  * trade削除
@@ -93,7 +158,7 @@ export const upsertTrade = async (tradeData: TradeRow) => {
  * @returns
  */
 export const deleteTrade = async (tradeId: number) => {
-  const { db, userId } = await getRepoContext();
+  const { db } = await getRepoContext();
   
   // trade を取得して journalId を取得
   const trade = await db.query.trades.findFirst({
