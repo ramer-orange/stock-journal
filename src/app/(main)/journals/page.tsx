@@ -1,5 +1,5 @@
 import { getJournalsRepo } from "@/repositories/journals";
-import JournalLists from "@/app/(main)/journals/_components/JournalLists/page";
+import JournalLists from "@/app/(main)/journals/_components/journalLists/JournalList";
 import { getMastersRepo } from "@/repositories/masters";
 
 const journalsPage = async () => {

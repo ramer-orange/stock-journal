@@ -4,21 +4,23 @@ import { getRepoContext } from "@/lib/server/getRepoContext";
 import { journals } from "@/drizzle/schema/journals";
 import { z } from "zod";
 import { ja } from "zod/locales";
+import { checkPermissionJournal } from "@/repositories/utils/checkPermissionJournal";
+
+// 日本語化
+z.config(ja());
 
 /** Journal データのバリデーションスキーマ */
 const journalInputSchema = z.object({
-  id: z.number().int().optional(),
+  id: z.number().int(),
   accountTypeId: z.number().int().positive().nullable().optional(),
   assetTypeId: z.number().int().positive().nullable().optional(),
-  baseCurrency: z.enum(["USD", "JPY"]).optional(),
+  baseCurrency: z.enum(["USD", "JPY"]),
   name: z.string().max(255).nullable().optional(),
   code: z.string().max(255).nullable().optional(),
   displayOrder: z.number().int(),
   checked: z.boolean(),
 });
 
-// 日本語化
-z.config(ja());
 
 /**
  * 記録一覧を取得
@@ -33,6 +35,7 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
     with: {
       accountType: true,
       assetType: true,
+      trades: true,
     },
   });
 
@@ -49,23 +52,12 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
 
   // バリデーション実行
-  const validationResult = journalInputSchema.safeParse({
-    id: journalData.id,
-    accountTypeId: journalData.accountTypeId,
-    assetTypeId: journalData.assetTypeId,
-    baseCurrency: journalData.baseCurrency,
-    name: journalData.name,
-    code: journalData.code,
-    displayOrder: journalData.displayOrder,
-    checked: journalData.checked,
-  });
-
+  const validationResult = journalInputSchema.safeParse(journalData);
   if (!validationResult.success) {
     return {
       errors: z.flattenError(validationResult.error)
     }
   }
-
   const validatedData = validationResult.data;
 
   // DBに存在するかチェック（所有者確認も兼ねる）
@@ -108,9 +100,25 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
  * @param id
  */
 export const deleteJournal = async (id: number) => {
-  const { db, userId } = await getRepoContext();
+  const { db } = await getRepoContext();
 
-  const result = await db.delete(journals).where(and(eq(journals.id, id), eq(journals.userId, userId)));
+  // 権限チェック
+  const checkedPermissionJournal = await checkPermissionJournal(id);
+  if (!checkedPermissionJournal) {
+    return {
+      success: false,
+      errors: { formErrors: ["権限がありません。"] }
+    };
+  }
 
-  return result;
+  const result = await db.delete(journals).where(eq(journals.id, id));
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: { formErrors: ["削除に失敗しました。"] }
+    };
+  }
+
+  return { success: true };
 };

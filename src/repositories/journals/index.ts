@@ -12,7 +12,9 @@ export interface JournalsRepository {
   }>;
   deleteJournal: (id: number) => Promise<{
     success: boolean;
-    errors?: string[];
+    errors?: {
+      formErrors: string[];
+    };
   }>;
 }
 export function getJournalsRepo(): JournalsRepository {
