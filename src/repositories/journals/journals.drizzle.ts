@@ -4,6 +4,7 @@ import { getRepoContext } from "@/lib/server/getRepoContext";
 import { journals } from "@/drizzle/schema/journals";
 import { z } from "zod";
 import { ja } from "zod/locales";
+import { checkPermissionJournal } from "@/repositories/utils/checkPermissionJournal";
 
 // 日本語化
 z.config(ja());
@@ -49,17 +50,14 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
  */
 export const upsertJournal = async (journalData: JournalWithRelations) => {
   const { db, userId } = await getRepoContext();
-  console.log('journalData!!', journalData);
 
   // バリデーション実行
   const validationResult = journalInputSchema.safeParse(journalData);
-
   if (!validationResult.success) {
     return {
       errors: z.flattenError(validationResult.error)
     }
   }
-
   const validatedData = validationResult.data;
 
   // DBに存在するかチェック（所有者確認も兼ねる）
@@ -102,9 +100,25 @@ export const upsertJournal = async (journalData: JournalWithRelations) => {
  * @param id
  */
 export const deleteJournal = async (id: number) => {
-  const { db, userId } = await getRepoContext();
+  const { db } = await getRepoContext();
 
-  const result = await db.delete(journals).where(and(eq(journals.id, id), eq(journals.userId, userId)));
+  // 権限チェック
+  const checkedPermissionJournal = await checkPermissionJournal(id);
+  if (!checkedPermissionJournal) {
+    return {
+      success: false,
+      errors: { formErrors: ["権限がありません。"] }
+    };
+  }
 
-  return result;
+  const result = await db.delete(journals).where(eq(journals.id, id));
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: { formErrors: ["削除に失敗しました。"] }
+    };
+  }
+
+  return { success: true };
 };

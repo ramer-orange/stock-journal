@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { trades } from "@/drizzle/schema/trades";
 import { journals } from "@/drizzle/schema/journals";
 import { JournalRow } from "@/types/journals";
+import { checkPermissionJournal } from "@/repositories/utils/checkPermissionJournal";
 
 // 日本語化
 z.config(ja());
@@ -30,20 +31,6 @@ type ValidatedTradeData = z.infer<typeof tradeInputSchema>;
 
 
 /**
-* 権限チェック（journal）
-*
-* @param {number} journalId - Journal ID
-* @returns {Promise<boolean>}
-*/
-export const checkPermissionJournal = async (journalId: number) => {
-  const { db, userId } = await getRepoContext();
-  return await db.query.journals.findFirst({
-    where: and(eq(journals.id, journalId), eq(journals.userId, userId)),
-  });
-};
-
-
-/**
  * tradeを upsert
  *
  * @param {TradeRow} tradeData - Trade data
@@ -64,6 +51,7 @@ export const upsertTrade = async (tradeData: TradeRow) => {
   }
   const validatedData = validationResult.data;
 
+  // journalが作成されていない場合
   if (validatedData.journalId < 0) {
     const journalData: JournalRow = {
       id: -Date.now(),
@@ -80,16 +68,7 @@ export const upsertTrade = async (tradeData: TradeRow) => {
     };
     const result = await upsertTradeWithJournal(journalData, validatedData);
 
-    if (result?.tradeId) {
-      return { id: result.tradeId };
-    }
-
-    return {
-      errors: {
-        formErrors: ["保存に失敗しました。"],
-        fieldErrors: {}
-      }
-    };
+    return { id: result.tradeId };
   }
 
   // 権限チェック
@@ -162,22 +141,35 @@ export const upsertTradeWithJournal = async (JournalData: JournalRow, validatedT
 export const deleteTrade = async (tradeId: number) => {
   const { db } = await getRepoContext();
   
-  // trade を取得して journalId を取得
   const trade = await db.query.trades.findFirst({
     where: eq(trades.id, tradeId),
   });
   
   if (!trade) {
-    return { errors: { formErrors: ["取引が見つかりません。"] } };
+    return {
+      success: false,
+      errors: { formErrors: ["取引が見つかりません。"] }
+    };
   }
   
   // journal の権限チェック
   const checkedPermissionJournal = await checkPermissionJournal(trade.journalId);
   if (!checkedPermissionJournal) {
-    return { errors: { formErrors: ["権限がありません。"] } };
+    return {
+      success: false,
+      errors: { formErrors: ["権限がありません。"] }
+    };
   }
   
   // 削除実行
-  await db.delete(trades).where(eq(trades.id, tradeId));
+  const result = await db.delete(trades).where(eq(trades.id, tradeId));
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: { formErrors: ["削除に失敗しました。"] }
+    };
+  }
+
   return { success: true };
 };

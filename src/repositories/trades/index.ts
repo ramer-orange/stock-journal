@@ -19,7 +19,7 @@ export interface TradesRepository {
     };
   }>;
   deleteTrade: (tradeId: number) => Promise<{
-    success?: boolean;
+    success: boolean;
     errors?: {
       formErrors: string[];
     };

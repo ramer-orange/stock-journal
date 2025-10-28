@@ -31,8 +31,6 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
   const handleChangeTradedDate = (id: number, journalId: number, field: string, value: string | number | boolean | null) => {
     setTrade({ ...trade, [field]: value });
     changedTradeId.current = id;
-    console.log('changedTradeId', changedTradeId.current);
-    console.log('trade', trade);
   }
   // デバウンス処理で保存
   const [debouncedTrade] = useDebounce(
@@ -52,7 +50,6 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
 
     const saveTrade = async () => {
       const result = await upsertTradeAction(debouncedTrade);
-      console.log('result', result);
       if (!result.success) {
         setTrade(prevTrade => prevTrade.id === debouncedTrade.id ? { ...prevTrade, errors: result.errors } : prevTrade);
         setActionError(prevErrors => ({ ...prevErrors, [debouncedTrade.id]: result.errors.formErrors }));

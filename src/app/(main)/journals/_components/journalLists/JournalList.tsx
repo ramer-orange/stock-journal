@@ -100,7 +100,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
     if (id >= 0) {
       const result = await deleteJournalAction(id);
       if (!result.success) {
-        setActionError(prevErrors => ({ ...prevErrors, [id]: result.errors || ["削除に失敗しました。"] }));
+        setActionError(prevErrors => ({ ...prevErrors, [id]: result.errors?.formErrors || ["削除に失敗しました。"] }));
         return;
       }
     }
