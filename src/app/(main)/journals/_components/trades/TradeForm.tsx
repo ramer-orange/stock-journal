@@ -93,7 +93,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-1.5">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={sideBadgeVariant}>{sideLabel}</Badge>
-          <span className="text-xs text-text-secondary md:text-sm">
+          <span className="text-sm text-text-secondary md:text-base">
             {tradedDateValue ? `取引日: ${tradedDateValue}` : "取引日が未設定です"}
           </span>
         </div>
@@ -104,14 +104,14 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
             売買日
           </span>
           <Input
             type="date"
             name="tradedDate"
             value={tradedDateValue}
-            size="sm"
+            className="px-3 py-1.5 text-sm"
             onChange={(e) => handleChangeTradedDate(trade.id, journalId, "tradedDate", e.target.value)}
             hasError={Boolean(tradeFieldErrors.tradedDate?.length)}
           />
@@ -121,13 +121,13 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
             売買区分
           </span>
           <Select
             name="side"
             value={trade.side ?? "BUY"}
-            size="sm"
+            className="px-3 py-1.5 pr-8 text-sm"
             onChange={(e) => handleChangeTradedDate(trade.id, journalId, "side", e.target.value)}
             hasError={Boolean(tradeFieldErrors.side?.length)}
           >
@@ -140,7 +140,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
             売買単価
           </span>
           <Input
@@ -150,7 +150,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
             onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", e.target.value)}
             inputMode="decimal"
             placeholder="例: 1540.5"
-            size="sm"
+            className="px-3 py-1.5 text-sm"
             hasError={Boolean(tradeFieldErrors.priceValue?.length)}
           />
           {tradeFieldErrors.priceValue && (
@@ -159,7 +159,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
             数量
           </span>
           <Input
@@ -169,7 +169,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
             onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", e.target.value)}
             inputMode="decimal"
             placeholder="例: 100"
-            size="sm"
+            className="px-3 py-1.5 text-sm"
             hasError={Boolean(tradeFieldErrors.quantityValue?.length)}
           />
           {tradeFieldErrors.quantityValue && (
@@ -179,7 +179,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
 
         <div className="col-span-2 grid gap-4 md:grid-cols-2">
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
               売買理由
             </span>
             <Textarea
@@ -188,8 +188,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
               onChange={(e) => handleChangeTradedDate(trade.id, journalId, "reason", e.target.value)}
               placeholder="エントリー／イグジットの根拠を記録"
               rows={2}
-              size="sm"
-              className="min-h-[72px]"
+              className="min-h-[72px] px-3 py-1.5 text-sm"
               hasError={Boolean(tradeFieldErrors.reason?.length)}
             />
             {tradeFieldErrors.reason && (
@@ -198,7 +197,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
               メモ
             </span>
             <Textarea
@@ -207,8 +206,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
               onChange={(e) => handleChangeTradedDate(trade.id, journalId, "memo", e.target.value)}
               placeholder="次回に活かしたい学びや市場の状況"
               rows={2}
-              size="sm"
-              className="min-h-[72px]"
+              className="min-h-[72px] px-3 py-1.5 text-sm"
               hasError={Boolean(tradeFieldErrors.memo?.length)}
             />
             {tradeFieldErrors.memo && (
