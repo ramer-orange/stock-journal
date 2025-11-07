@@ -7,6 +7,7 @@ import { trades } from "@/drizzle/schema/trades";
 import { journals } from "@/drizzle/schema/journals";
 import { JournalRow } from "@/types/journals";
 import { checkPermissionJournal } from "@/repositories/utils/checkPermissionJournal";
+import { convertDecimalToIntegerAndScale } from "@/repositories/utils/decimalScaleConverters";
 
 // 日本語化
 z.config(ja());
@@ -16,9 +17,9 @@ const tradeInputSchema = z.object({
   id: z.number().int(),
   journalId: z.number().int(),
   side: z.enum(["BUY", "SELL"]),
-  priceValue: z.number().int().optional().nullable(),
+  priceValue: z.number().optional().nullable(),
   priceScale: z.number().int().optional().nullable(),
-  quantityValue: z.number().int().optional().nullable(),
+  quantityValue: z.number().optional().nullable(),
   quantityScale: z.number().int().optional().nullable(),
   reason: z.string().optional().nullable(),
   memo: z.string().optional().nullable(),
@@ -51,6 +52,18 @@ export const upsertTrade = async (tradeData: TradeRow) => {
   }
   const validatedData = validationResult.data;
 
+  // 小数を整数とscaleに変換
+  const priceConverted = convertDecimalToIntegerAndScale(validatedData.priceValue);
+  const quantityConverted = convertDecimalToIntegerAndScale(validatedData.quantityValue);
+
+  const dataForDb = {
+    ...validatedData,
+    priceValue: priceConverted.value,
+    priceScale: priceConverted.scale ?? validatedData.priceScale,
+    quantityValue: quantityConverted.value,
+    quantityScale: quantityConverted.scale ?? validatedData.quantityScale,
+  };
+
   // journalが作成されていない場合
   if (validatedData.journalId < 0) {
     const journalData: JournalRow = {
@@ -66,7 +79,7 @@ export const upsertTrade = async (tradeData: TradeRow) => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    const result = await upsertTradeWithJournal(journalData, validatedData);
+    const result = await upsertTradeWithJournal(journalData, dataForDb);
 
     return { id: result.tradeId };
   }
@@ -85,14 +98,14 @@ export const upsertTrade = async (tradeData: TradeRow) => {
     : null;
 
   if (existingTrade) { //　更新
-      const rows = await db.insert(trades).values({ ...validatedData }).onConflictDoUpdate({
+      const rows = await db.insert(trades).values({ ...dataForDb }).onConflictDoUpdate({
       target: trades.id,
-      set: { ...validatedData, updatedAt: new Date() },
+      set: { ...dataForDb, updatedAt: new Date() },
     }).returning({ id: trades.id });
 
     return { id: rows[0].id };
   } else { // 新規作成
-    const { id: _id, ...dataWithoutId } = validatedData;
+    const { id: _id, ...dataWithoutId } = dataForDb;
     const rows = await db.insert(trades).values({ ...dataWithoutId }).returning({ id: trades.id });
     return { id: rows[0].id };
   }

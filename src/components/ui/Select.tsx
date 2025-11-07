@@ -4,7 +4,9 @@ import { forwardRef } from "react";
 import type { SelectHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
+type BaseSelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "size">;
+
+export interface SelectProps extends BaseSelectProps {
   hasError?: boolean;
   size?: "sm" | "md";
 }

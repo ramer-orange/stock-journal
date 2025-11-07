@@ -31,6 +31,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
   const changedTradeId = useRef(0);
   const isFirstRender = useRef(true);
   const [actionError, setActionError] = useState<Record<number, string[]>>({}); //フォーム全体に関わるエラーステート
+  const parseNumberInputValue = (value: string) => (value === "" ? null : Number(value));
 
 
   // trade upsert処理
@@ -147,7 +148,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
             type="number"
             name="priceValue"
             value={trade.priceValue ?? ""}
-            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", e.target.value)}
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", parseNumberInputValue(e.target.value))}
             inputMode="decimal"
             placeholder="例: 1540.5"
             className="px-3 py-1.5 text-sm"
@@ -166,7 +167,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
             type="number"
             name="quantityValue"
             value={trade.quantityValue ?? ""}
-            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", e.target.value)}
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", parseNumberInputValue(e.target.value))}
             inputMode="decimal"
             placeholder="例: 100"
             className="px-3 py-1.5 text-sm"
