@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  env: {
+    // Cloudflare Access設定（ミドルウェアで使用）
+    POLICY_AUD: process.env.POLICY_AUD,
+    TEAM_DOMAIN: process.env.TEAM_DOMAIN,
+  },
 };
 
 export default nextConfig;
