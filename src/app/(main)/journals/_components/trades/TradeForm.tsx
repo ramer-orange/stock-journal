@@ -9,8 +9,14 @@
  * @returns TradeFormコンポーネント
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
+import { Button } from "@/components/ui/Button";
+import { ErrorMessage } from "@/components/ui/ErrorMessage";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
+import { Badge } from "@/components/ui/Badge";
 import { upsertTradeAction } from "@/app/(main)/journals/_actions/tradeActions";
 import { TradeClient } from "@/types/trades";
 
@@ -25,6 +31,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
   const changedTradeId = useRef(0);
   const isFirstRender = useRef(true);
   const [actionError, setActionError] = useState<Record<number, string[]>>({}); //フォーム全体に関わるエラーステート
+  const parseNumberInputValue = (value: string) => (value === "" ? null : Number(value));
 
 
   // trade upsert処理
@@ -56,15 +63,16 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
       } else {
         setTrade(prevTrade => prevTrade.id === debouncedTrade.id ? { ...prevTrade, id: result.id } : prevTrade);
         setActionError(prevErrors => {
-          const { [debouncedTrade.id]: _, ...rest } = prevErrors;
-          return rest;
+          const nextErrors = { ...prevErrors };
+          delete nextErrors[debouncedTrade.id];
+          return nextErrors;
         });
       }
 
       // 変更したTradeIDをリセット
       changedTradeId.current = 0;
-    }
-    saveTrade();
+  }
+  saveTrade();
   }, [debouncedTrade]);
 
 
@@ -76,39 +84,140 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
     }
   }
 
+  const tradeFieldErrors = trade.errors ?? {};
+  const sideLabel = trade.side === "SELL" ? "売り" : "買い";
+  const sideBadgeVariant = trade.side === "SELL" ? "danger" : "success";
+  const tradedDateValue = trade.tradedDate ?? "";
+
   return (
-    <div>
-      <div>
-        <label>
-          <span>売買日</span>
-          <input type="date" name="tradedDate" value={trade.tradedDate ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "tradedDate", e.target.value)}/>
-        </label>
-        <label>
-          <span>売買区分</span>
-          <select name="side" id="side" value={trade.side ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "side", e.target.value)}>
+    <section className="flex flex-col gap-2.5 rounded-lg border border-border bg-base-darker/60 p-3 shadow-md shadow-black/10 md:p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={sideBadgeVariant}>{sideLabel}</Badge>
+          <span className="text-sm text-text-secondary md:text-base">
+            {tradedDateValue ? `取引日: ${tradedDateValue}` : "取引日が未設定です"}
+          </span>
+        </div>
+        <Button variant="danger" size="sm" onClick={handleDeleteTrade}>
+          取引を削除
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+            売買日
+          </span>
+          <Input
+            type="date"
+            name="tradedDate"
+            value={tradedDateValue}
+            className="px-3 py-1.5 text-sm"
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "tradedDate", e.target.value)}
+            hasError={Boolean(tradeFieldErrors.tradedDate?.length)}
+          />
+          {tradeFieldErrors.tradedDate && (
+            <p className="text-xs text-red-400">{tradeFieldErrors.tradedDate.join("、")}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+            売買区分
+          </span>
+          <Select
+            name="side"
+            value={trade.side ?? "BUY"}
+            className="px-3 py-1.5 pr-8 text-sm"
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "side", e.target.value)}
+            hasError={Boolean(tradeFieldErrors.side?.length)}
+          >
             <option value="BUY">買い</option>
             <option value="SELL">売り</option>
-          </select>
-        </label>
-        <label>
-          <span>売買単価</span>
-          <input type="number" name="priceValue" value={trade.priceValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", e.target.value)}/>
-        </label>
-        <label>
-          <span>数量</span>
-          <input type="number" name="quantityValue" value={trade.quantityValue ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", e.target.value)}/>
-        </label>
-        <label>
-          <span>売買理由</span>
-          <textarea name="reason" value={trade.reason ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "reason", e.target.value)}/>
-        </label>
-        <label>
-          <span>メモ</span>
-            <textarea name="memo" value={trade.memo ?? ""} onChange={(e) => handleChangeTradedDate(trade.id, journalId, "memo", e.target.value)}/>
-        </label>
-        <button type="button" onClick={handleDeleteTrade}>削除</button>
-        <div>{actionError?.[trade.id]?.join(", ")}</div>
+          </Select>
+          {tradeFieldErrors.side && (
+            <p className="text-xs text-red-400">{tradeFieldErrors.side.join("、")}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+            売買単価
+          </span>
+          <Input
+            type="number"
+            name="priceValue"
+            value={trade.priceValue ?? ""}
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "priceValue", parseNumberInputValue(e.target.value))}
+            inputMode="decimal"
+            placeholder="例: 1540.5"
+            className="px-3 py-1.5 text-sm"
+            hasError={Boolean(tradeFieldErrors.priceValue?.length)}
+          />
+          {tradeFieldErrors.priceValue && (
+            <p className="text-xs text-red-400">{tradeFieldErrors.priceValue.join("、")}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+            数量
+          </span>
+          <Input
+            type="number"
+            name="quantityValue"
+            value={trade.quantityValue ?? ""}
+            onChange={(e) => handleChangeTradedDate(trade.id, journalId, "quantityValue", parseNumberInputValue(e.target.value))}
+            inputMode="decimal"
+            placeholder="例: 100"
+            className="px-3 py-1.5 text-sm"
+            hasError={Boolean(tradeFieldErrors.quantityValue?.length)}
+          />
+          {tradeFieldErrors.quantityValue && (
+            <p className="text-xs text-red-400">{tradeFieldErrors.quantityValue.join("、")}</p>
+          )}
+        </div>
+
+        <div className="col-span-2 grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+              売買理由
+            </span>
+            <Textarea
+              name="reason"
+              value={trade.reason ?? ""}
+              onChange={(e) => handleChangeTradedDate(trade.id, journalId, "reason", e.target.value)}
+              placeholder="エントリー／イグジットの根拠を記録"
+              rows={2}
+              className="min-h-[72px] px-3 py-1.5 text-sm"
+              hasError={Boolean(tradeFieldErrors.reason?.length)}
+            />
+            {tradeFieldErrors.reason && (
+              <p className="text-xs text-red-400">{tradeFieldErrors.reason.join("、")}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-semibold uppercase tracking-wide text-text-secondary">
+              メモ
+            </span>
+            <Textarea
+              name="memo"
+              value={trade.memo ?? ""}
+              onChange={(e) => handleChangeTradedDate(trade.id, journalId, "memo", e.target.value)}
+              placeholder="次回に活かしたい学びや市場の状況"
+              rows={2}
+              className="min-h-[72px] px-3 py-1.5 text-sm"
+              hasError={Boolean(tradeFieldErrors.memo?.length)}
+            />
+            {tradeFieldErrors.memo && (
+              <p className="text-xs text-red-400">{tradeFieldErrors.memo.join("、")}</p>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+
+      <ErrorMessage messages={actionError?.[trade.id]} className="mt-1" />
+    </section>
   );
 }

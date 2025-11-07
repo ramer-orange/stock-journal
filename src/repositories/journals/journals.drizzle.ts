@@ -5,6 +5,7 @@ import { journals } from "@/drizzle/schema/journals";
 import { z } from "zod";
 import { ja } from "zod/locales";
 import { checkPermissionJournal } from "@/repositories/utils/checkPermissionJournal";
+import { convertIntegerAndScaleToDecimal } from "@/repositories/utils/decimalScaleConverters";
 
 // 日本語化
 z.config(ja());
@@ -39,7 +40,20 @@ export const getJournals = async (): Promise<JournalWithRelations[]> => {
     },
   });
 
-  return journalLists as JournalWithRelations[];
+  // 整数とscaleから少数に変換
+  const convertedJournalLists = journalLists.map((journal) => {
+    return {
+      ...journal,
+      trades: journal.trades.map((trade) => {
+        const priceValue = convertIntegerAndScaleToDecimal(trade.priceValue ?? null, trade.priceScale ?? null);
+        const quantityValue = convertIntegerAndScaleToDecimal(trade.quantityValue ?? null, trade.quantityScale ?? null);
+
+        return { ...trade, priceValue, quantityValue };
+      }),
+    };
+  });
+
+  return convertedJournalLists  as JournalWithRelations[];
 };
 
 /**

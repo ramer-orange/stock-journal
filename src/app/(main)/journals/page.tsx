@@ -6,11 +6,13 @@ const journalsPage = async () => {
   const journals = await getJournalsRepo().getJournals();
   const masters = await getMastersRepo().getMasters();
   return (
-    <div>
-      <div>journals</div>
+    <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-semibold text-text-primary">取引記録</h1>
+      </header>
       <JournalLists getJournals={journals} masters={masters} />
-    </div>
-  )
-}
+    </main>
+  );
+};
 
 export default journalsPage
