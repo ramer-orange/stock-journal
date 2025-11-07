@@ -231,7 +231,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
                       <Input
                         name="name"
                         value={journal.name ?? ""}
-                        placeholder="例: 国内株デイトレ口座"
+                        placeholder="例: ソフトバンクグループ"
                         size="sm"
                         onChange={(e) => handleUpdateJournal(journal.id, "name", e.target.value)}
                         hasError={Boolean(journalErrors.name?.length)}
@@ -248,7 +248,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
                       <Input
                         name="code"
                         value={journal.code ?? ""}
-                        placeholder="証券コードや口座名を入力"
+                        placeholder="証券コードやティッカーコードを入力"
                         size="sm"
                         onChange={(e) => handleUpdateJournal(journal.id, "code", e.target.value)}
                         hasError={Boolean(journalErrors.code?.length)}
