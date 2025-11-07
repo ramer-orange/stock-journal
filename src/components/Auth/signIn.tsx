@@ -32,7 +32,7 @@ export default function SignIn({ className }: SignInProps) {
             Google でサインイン
           </Button>
           <div className="rounded-lg border border-border/70 bg-base-light/80 px-3 py-2 text-xs text-text-secondary">
-            続行すると、Stock Journal が Google アカウントの基本プロフィール情報（氏名・メールアドレス）を利用することに同意したものとみなされます。個人情報は Cloudflare D1 上で暗号化保存されます。
+            続行すると、株レンズ が Google アカウントの基本プロフィール情報（氏名・メールアドレス）を利用することに同意したものとみなされます。個人情報は Cloudflare D1 上で暗号化保存されます。
           </div>
         </form>
       </CardContent>

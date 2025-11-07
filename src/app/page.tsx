@@ -44,7 +44,7 @@ export default function Home() {
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 lg:flex-row lg:items-center">
           <div className="flex-1 space-y-8">
             <p className="inline-flex items-center gap-2 rounded-full border border-base-light/30 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-green-300">
-              Stock Journal
+              株レンズ
             </p>
             <div className="space-y-5">
               <h1 className="text-3xl font-semibold leading-tight text-white md:text-5xl">
@@ -67,7 +67,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" aria-hidden />
               <Image
                 src="/top.jpeg"
-                alt="Stock Journal UI preview"
+                alt="株レンズ UI preview"
                 width={800}
                 height={620}
                 className="relative h-auto w-full object-cover"
@@ -80,8 +80,8 @@ export default function Home() {
 
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Why Stock Journal</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">Stock Journal の 3 つの特徴</h2>
+          <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Why 株レンズ</p>
+          <h2 className="mt-3 text-3xl font-semibold text-white">株レンズ の 3 つの特徴</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {features.map((feature) => (
@@ -132,7 +132,7 @@ export default function Home() {
       <section className="px-6 py-20">
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center rounded-3xl border border-base-light/20 bg-base-dark/70 p-10 text-center shadow-xl">
           <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Ready?</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white">今すぐ Stock Journal を試す</h2>
+          <h2 className="mt-4 text-3xl font-semibold text-white">今すぐ 株レンズ を試す</h2>
           <p className="mt-3 text-base text-white/80">
             Google アカウントでログインし、取引の振り返りを今日から始めましょう。
           </p>

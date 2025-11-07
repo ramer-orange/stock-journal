@@ -18,8 +18,8 @@ export default async function AppHeader() {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-base-darker/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4 text-white">
         <Link href="/" className="flex items-center gap-3 font-semibold">
-          <Image src="/icon.png" alt="Stock Journal" width={28} height={28} />
-          Stock Journal
+          <Image src="/icon.png" alt="株レンズ" width={28} height={28} />
+          株レンズ
         </Link>
         <div className="flex items-center gap-0 sm:gap-2">
           {session ? (
