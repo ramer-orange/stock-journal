@@ -99,7 +99,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
           </span>
         </div>
         <Button variant="danger" size="sm" onClick={handleDeleteTrade}>
-          記録を削除
+          取引を削除
         </Button>
       </div>
 
