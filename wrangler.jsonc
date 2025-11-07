@@ -29,8 +29,8 @@
 	"vars": {
 		"AUTH_URL": "https://stock-journal.stock-journal.workers.dev",
 		// Cloudflare Access設定
-		"POLICY_AUD": "751ebead8533d88ccf80011ce90a345458431aa744d0daee078b545d822a4f1d",
-		"TEAM_DOMAIN": "https://your-team-name.cloudflareaccess.com"
+		"POLICY_AUD": "68230ca5356b8e5e5d88e26a64dcde1897d59313678a80f79b6cf240c938b089",
+		"TEAM_DOMAIN": "https://orangekai.cloudflareaccess.com"
 	}
 	/**
 	 * Smart Placement
