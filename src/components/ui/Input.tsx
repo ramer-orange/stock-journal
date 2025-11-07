@@ -4,7 +4,9 @@ import { forwardRef } from "react";
 import type { InputHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+type BaseInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "size">;
+
+export interface InputProps extends BaseInputProps {
   hasError?: boolean;
   size?: "sm" | "md";
 }
