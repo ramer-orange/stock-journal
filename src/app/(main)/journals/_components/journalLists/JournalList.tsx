@@ -345,7 +345,7 @@ export default function JournalLists({ getJournals, masters }: Props) {
                           取引ごとの理由や数量を入力して振り返りやすくします。
                         </p>
                       </div>
-                      <Button variant="secondary" size="sm" onClick={() => handleAddTrade(journal.id)}>
+                      <Button variant="primary" size="sm" onClick={() => handleAddTrade(journal.id)}>
                         売買記録を追加
                       </Button>
                     </div>

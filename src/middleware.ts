@@ -139,7 +139,10 @@ export async function middleware(req: NextRequest) {
   const requiresAuth = isProtectedPath(pathname)
 
   if (!requiresAuth) {
-    return NextResponse.next()
+    // pathnameをヘッダーに設定（Server Componentで使用するため）
+    const response = NextResponse.next()
+    response.headers.set('x-pathname', pathname)
+    return response
   }
 
   // セッションを見てリダイレクト判断
@@ -149,7 +152,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/signIn", req.url))
   }
 
-  return NextResponse.next()
+  // pathnameをヘッダーに設定（Server Componentで使用するため）
+  const response = NextResponse.next()
+  response.headers.set('x-pathname', pathname)
+  return response
 }
 
 // ミドルウェアを適用するパスを設定
