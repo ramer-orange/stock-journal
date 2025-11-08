@@ -341,9 +341,6 @@ export default function JournalLists({ getJournals, masters }: Props) {
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <h3 className="text-lg font-semibold text-text-primary">売買記録</h3>
-                        <p className="text-xs text-text-secondary md:text-sm">
-                          取引ごとの理由や数量を入力して振り返りやすくします。
-                        </p>
                       </div>
                       <Button variant="primary" size="sm" onClick={() => handleAddTrade(journal.id)}>
                         売買記録を追加
