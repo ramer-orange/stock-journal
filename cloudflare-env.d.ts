@@ -9,6 +9,8 @@ declare namespace Cloudflare {
 		AUTH_GOOGLE_ID?: string;
 		AUTH_GOOGLE_SECRET?: string;
 		AUTH_SECRET?: string;
+		POLICY_AUD?: string;
+		TEAM_DOMAIN?: string;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}

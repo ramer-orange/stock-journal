@@ -27,8 +27,11 @@
 		}
 	],
 	"vars": {
-    "AUTH_URL": "https://stock-journal.stock-journal.workers.dev"
-  }
+		"AUTH_URL": "https://stock-journal.stock-journal.workers.dev",
+		// Cloudflare Access設定
+		"POLICY_AUD": "7691b8a8728d67e8e768c794ad77a1810522ca0819d1f1c412c4cc7d01647cc7",
+		"TEAM_DOMAIN": "https://orangekai.cloudflareaccess.com"
+	}
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
