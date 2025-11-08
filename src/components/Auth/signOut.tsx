@@ -14,7 +14,7 @@ export function SignOut({ variant = "primary", className, children, ariaLabel }:
     <form
       action={async () => {
         "use server";
-        await signOut();
+        await signOut({ redirectTo: "/" });
       }}
     >
       <Button

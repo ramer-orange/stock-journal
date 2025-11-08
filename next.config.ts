@@ -2,12 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  env: {
-    ALLOWED_IPS: process.env.ALLOWED_IPS,
-    DISABLE_IP_RESTRICTION: process.env.DISABLE_IP_RESTRICTION,
-  },
   experimental: {
     authInterrupts: true,
+  },
+  env: {
+    // Cloudflare Access設定（ミドルウェアで使用）
+    POLICY_AUD: process.env.POLICY_AUD,
+    TEAM_DOMAIN: process.env.TEAM_DOMAIN,
   },
 };
 

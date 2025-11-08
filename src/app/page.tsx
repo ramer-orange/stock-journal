@@ -35,6 +35,29 @@ const testimonials = [
   },
 ];
 
+const GoogleGlyph = () => (
+  <span className="relative flex h-5 w-5 items-center justify-center">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+      <path
+        d="M12.24 10.2v3.84h5.41c-.22 1.26-.98 2.33-2.08 3.04l3.38 2.62c1.97-1.81 3.11-4.48 3.11-7.66 0-.74-.07-1.45-.2-2.14h-9.62z"
+        fill="#4285F4"
+      />
+      <path
+        d="M6.64 14.32l-.88.67-2.69 2.08c1.73 3.43 5.27 5.81 9.37 5.81 2.83 0 5.21-.93 6.95-2.54l-3.38-2.62c-.94.63-2.14 1.01-3.57 1.01-2.75 0-5.08-1.86-5.91-4.41z"
+        fill="#34A853"
+      />
+      <path
+        d="M3.07 7.72C2.39 9.15 2 10.75 2 12.4s.39 3.25 1.07 4.68c.83-2.55 3.16-4.41 5.91-4.41.84 0 1.61.14 2.32.38V9.1H6.64c-.99 0-1.86.26-2.57.72z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12.24 4.58c1.54 0 2.92.53 4.01 1.56l2.99-2.99C17.44 1.24 15.06.2 12.24.2 8.14.2 4.6 2.58 2.67 6l3.97 3.1c.83-2.55 3.16-4.52 5.6-4.52z"
+        fill="#EA4335"
+      />
+    </svg>
+    <span className="sr-only">Google ロゴ</span>
+  </span>
+);
 
 export default function Home() {
   return (
@@ -43,20 +66,18 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.25),_transparent_55%)] blur-3xl lg:block" aria-hidden />
         <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-12 lg:flex-row lg:items-center">
           <div className="flex-1 space-y-8">
-            <p className="inline-flex items-center gap-2 rounded-full border border-base-light/30 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-green-300">
-              Stock Journal
-            </p>
             <div className="space-y-5">
               <h1 className="text-3xl font-semibold leading-tight text-white md:text-5xl">
                 トレードの記憶を、<br/>意思決定の資産へ。
               </h1>
               <p className="text-base text-white/80 md:text-lg">
-                取引を記録し、振り返り。投資家のための記録プラットフォームです。
+                取引を記録し、振り返り。<br/>投資家のための記録プラットフォーム。
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
               <Link href="/signIn">
                 <Button size="lg" className="gap-2 rounded-xl bg-white text-base-darker shadow-lg shadow-black/10 hover:bg-slate-100">
+                  <GoogleGlyph />
                   Google で始める
                 </Button>
               </Link>
@@ -67,7 +88,7 @@ export default function Home() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" aria-hidden />
               <Image
                 src="/top.jpeg"
-                alt="Stock Journal UI preview"
+                alt="株レンズ UI preview"
                 width={800}
                 height={620}
                 className="relative h-auto w-full object-cover"
@@ -80,8 +101,8 @@ export default function Home() {
 
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-16">
         <div className="text-center">
-          <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Why Stock Journal</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">Stock Journal の 3 つの特徴</h2>
+          <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Why 株レンズ</p>
+          <h2 className="mt-3 text-3xl font-semibold text-white">株レンズ の 3 つの特徴</h2>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
           {features.map((feature) => (
@@ -132,12 +153,13 @@ export default function Home() {
       <section className="px-6 py-20">
         <div className="mx-auto flex w-full max-w-4xl flex-col items-center rounded-3xl border border-base-light/20 bg-base-dark/70 p-10 text-center shadow-xl">
           <p className="text-xs uppercase tracking-[0.3em] text-green-300/80">Ready?</p>
-          <h2 className="mt-4 text-3xl font-semibold text-white">今すぐ Stock Journal を試す</h2>
+          <h2 className="mt-4 text-3xl font-semibold text-white">今すぐ 株レンズ を試す</h2>
           <p className="mt-3 text-base text-white/80">
             Google アカウントでログインし、取引の振り返りを今日から始めましょう。
           </p>
           <Link href="/signIn" className="mt-6">
             <Button size="lg" className="gap-2 rounded-xl bg-white text-base-darker shadow-lg shadow-black/10 hover:bg-slate-100">
+              <GoogleGlyph />
               Google で始める
             </Button>
           </Link>
