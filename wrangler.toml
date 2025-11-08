@@ -10,12 +10,6 @@ directory = ".open-next/assets"
 [observability]
 enabled = true
 
-[[d1_databases]]
-binding = "stock_journal_db"
-database_name = "stock_journal_db"
-database_id = "9bc4d628-e8cb-407f-970e-c4eca51be190"
-migrations_dir = "drizzle/migrations"
-
 [env.dev]
 name = "stock-journal-dev"
 workers_dev = true
@@ -24,8 +18,14 @@ routes = []
 [env.dev.vars]
 AUTH_URL = "https://stock-journal.stock-journal.workers.dev"
 ENV = "dev"
-POLICY_AUD = "7691b8a8728d67e8e768c794ad77a1810522ca0819d1f1c412c4cc7d01647cc7"
+POLICY_AUD = "62a67e8beea072aaa51ef5274860def244c980988b021023b611ab7dae79f1a2"
 TEAM_DOMAIN = "https://orangekai.cloudflareaccess.com"
+
+[[env.dev.d1_databases]]
+binding = "stock_journal_db"
+database_name = "stock_journal_dev"
+database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
+migrations_dir = "drizzle/migrations"
 
 [env.production]
 name = "stock-journal"
@@ -34,3 +34,9 @@ routes = ["stock-lens.win/*"]
 [env.production.vars]
 AUTH_URL = "https://stock-lens.win"
 ENV = "production"
+
+[[env.production.d1_databases]]
+binding = "stock_journal_db"
+database_name = "stock_journal_db"
+database_id = "9bc4d628-e8cb-407f-970e-c4eca51be190"
+migrations_dir = "drizzle/migrations"
