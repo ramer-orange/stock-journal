@@ -44,7 +44,7 @@ export default async function AppHeader() {
             </>
           ) : (
             <Link href="/signIn">
-              <Button variant="secondary" className="rounded-xl border border-white/20 bg-transparent px-0 text-white hover:bg-white/10">
+              <Button variant="secondary" className="rounded-xl border border-white/20 bg-transparent px-0 text-white hover:bg-white/10 sm:px-4">
                 サインイン
               </Button>
             </Link>

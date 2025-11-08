@@ -29,7 +29,7 @@
 	"vars": {
 		"AUTH_URL": "https://stock-journal.stock-journal.workers.dev",
 		// Cloudflare Access設定
-		"POLICY_AUD": "68230ca5356b8e5e5d88e26a64dcde1897d59313678a80f79b6cf240c938b089",
+		"POLICY_AUD": "7691b8a8728d67e8e768c794ad77a1810522ca0819d1f1c412c4cc7d01647cc7",
 		"TEAM_DOMAIN": "https://orangekai.cloudflareaccess.com"
 	}
 	/**

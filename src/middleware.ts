@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtVerify, createRemoteJWKSet } from 'jose'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
+import { auth } from '@/auth'
 
 /**
  * Cloudflare Access JWT検証ミドルウェア
@@ -51,6 +52,20 @@ export async function middleware(req: NextRequest) {
     return response
   }
 
+  // NextAuthのセッションをチェック
+  try {
+    const session = await auth()
+    if (session) {
+      // NextAuthのセッションがある場合はそのまま通過
+      const response = NextResponse.next()
+      response.headers.set('x-pathname', pathname)
+      return response
+    }
+  } catch (error) {
+    // セッション取得に失敗した場合はCloudflare Accessのチェックに進む
+    console.error('[middleware] Failed to get NextAuth session:', error)
+  }
+
   // 環境変数のチェック（Cloudflare環境とローカル開発環境の両方に対応）
   let policyAud: string | undefined
   let teamDomain: string | undefined
@@ -89,22 +104,22 @@ export async function middleware(req: NextRequest) {
     )
   }
 
-  // JWTトークンを取得（公式の方法に従う）
+  // JWTトークンを取得
   const jwt =
     req.cookies.get('CF_Authorization')?.value ||
     req.headers.get('cf-access-jwt-assertion')
 
   if (!jwt) {
-    // トークンがない場合はCloudflare Accessのログインページにリダイレクト（公式の方法）
+    // トークンがない場合はCloudflare Accessのログインページにリダイレクト
     const loginUrl = `${teamDomain}/cdn-cgi/access/login`
     return NextResponse.redirect(loginUrl)
   }
 
-  // JWKSを取得（公式の方法に従う）
+  // JWKSを取得
   const JWKS = getJWKS(teamDomain)
 
   try {
-    // JWTを検証（公式の方法に従う）
+    // JWTを検証
     const { payload } = await jwtVerify(jwt, JWKS, {
       issuer: teamDomain,
       audience: policyAud,
@@ -121,7 +136,7 @@ export async function middleware(req: NextRequest) {
 
     return response
   } catch {
-    // 検証失敗時はCloudflare Accessのログインページにリダイレクト（公式の方法）
+    // 検証失敗時はCloudflare Accessのログインページにリダイレクト
     const loginUrl = `${teamDomain}/cdn-cgi/access/login`
     return NextResponse.redirect(loginUrl)
   }
