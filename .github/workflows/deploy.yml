@@ -32,6 +32,15 @@ jobs:
       - name: Build
         run: npx opennextjs-cloudflare build
 
+      - name: Verify build output
+        run: |
+          if [ ! -f ".open-next/worker.js" ]; then
+            echo "Error: .open-next/worker.js not found after build"
+            ls -la .open-next/ || echo ".open-next directory does not exist"
+            exit 1
+          fi
+          echo "Build output verified: .open-next/worker.js exists"
+
       - name: Deploy to Cloudflare Workers
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
