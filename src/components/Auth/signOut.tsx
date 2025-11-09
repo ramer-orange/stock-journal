@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode } from "react";
 import { signOut } from "@/auth";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
 type SignOutProps = {
@@ -14,7 +15,8 @@ export function SignOut({ variant = "primary", className, children, ariaLabel }:
     <form
       action={async () => {
         "use server";
-        await signOut({ redirectTo: "/" });
+        await signOut({ redirect: false });
+        redirect("/");
       }}
     >
       <Button
