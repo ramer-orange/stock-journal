@@ -10,6 +10,13 @@ directory = ".open-next/assets"
 [observability]
 enabled = true
 
+[[d1_databases]]
+# Default binding used by `wrangler dev` / `next dev`
+binding = "stock_journal_db"
+database_name = "stock_journal_dev"
+database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
+migrations_dir = "drizzle/migrations"
+
 [env.dev]
 name = "stock-journal-dev"
 workers_dev = true
