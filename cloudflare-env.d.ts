@@ -6,6 +6,8 @@ declare namespace Cloudflare {
 		NEXTJS_ENV: string;
 		ASSETS: Fetcher;
 		stock_journal_db: D1Database;
+		AUTH_URL?: string;
+		ENV?: string;
 		AUTH_GOOGLE_ID?: string;
 		AUTH_GOOGLE_SECRET?: string;
 		AUTH_SECRET?: string;
