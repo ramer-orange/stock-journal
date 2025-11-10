@@ -23,7 +23,7 @@ workers_dev = true
 routes = []
 
 [env.dev.vars]
-AUTH_URL = "https://stock-journal.stock-journal.workers.dev"
+AUTH_URL = "https://stock-journal-dev.stock-journal.workers.dev"
 ENV = "dev"
 POLICY_AUD = "62a67e8beea072aaa51ef5274860def244c980988b021023b611ab7dae79f1a2"
 TEAM_DOMAIN = "https://orangekai.cloudflareaccess.com"

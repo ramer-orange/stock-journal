@@ -1,6 +1,9 @@
+"use client";
+
 import type { ComponentProps, ReactNode } from "react";
-import { signOut } from "@/auth";
-import { redirect } from "next/navigation";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 
 type SignOutProps = {
@@ -11,22 +14,30 @@ type SignOutProps = {
 };
 
 export function SignOut({ variant = "primary", className, children, ariaLabel }: SignOutProps) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const handleSignOut = () => {
+    startTransition(async () => {
+      try {
+        await signOut({ redirect: false, callbackUrl: "/" });
+      } finally {
+        router.push("/");
+        router.refresh();
+      }
+    });
+  };
+
   return (
-    <form
-      action={async () => {
-        "use server";
-        await signOut({ redirect: false });
-        redirect("/");
-      }}
+    <Button
+      type="button"
+      onClick={handleSignOut}
+      disabled={isPending}
+      variant={variant}
+      className={className}
+      aria-label={ariaLabel ?? "ログアウト"}
     >
-      <Button
-        type="submit"
-        variant={variant}
-        className={className}
-        aria-label={ariaLabel ?? "ログアウト"}
-      >
-        {children ?? "ログアウト"}
-      </Button>
-    </form>
+      {children ?? "ログアウト"}
+    </Button>
   );
 }
