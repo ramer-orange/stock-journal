@@ -1,7 +1,8 @@
-name = "stock-journal-dev"
+name = "stock-journal"
 main = ".open-next/worker.js"
 compatibility_date = "2025-03-01"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+workers_dev = true
 
 [assets]
 binding = "ASSETS"
@@ -11,31 +12,21 @@ directory = ".open-next/assets"
 enabled = true
 
 [[d1_databases]]
-# Default binding used by `wrangler dev` / `next dev`
+# Preview / workers.dev deployment (default `wrangler deploy`).
 binding = "stock_journal_db"
 database_name = "stock_journal_dev"
 database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
 migrations_dir = "drizzle/migrations"
 
-[env.dev]
-name = "stock-journal-dev"
-workers_dev = true
-routes = []
-
-[env.dev.vars]
-AUTH_URL = "https://stock-journal-dev.stock-journal.workers.dev"
+[vars]
+AUTH_URL = "https://stock-journal.stock-journal.workers.dev"
 ENV = "dev"
-POLICY_AUD = "62a67e8beea072aaa51ef5274860def244c980988b021023b611ab7dae79f1a2"
+POLICY_AUD = "4e0b4814dc40245715e4afd61ffc9562d99baf877b079f559fd3a4962989379a"
 TEAM_DOMAIN = "https://orangekai.cloudflareaccess.com"
 
-[[env.dev.d1_databases]]
-binding = "stock_journal_db"
-database_name = "stock_journal_dev"
-database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
-migrations_dir = "drizzle/migrations"
-
 [env.production]
-name = "stock-journal"
+name = "stock-journal-production"
+workers_dev = false
 routes = ["stock-lens.win/*"]
 
 [env.production.vars]
