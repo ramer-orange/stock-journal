@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const features = [
   {
     title: "取引の詳細記録",
-    description: "売買日、価格、数量に加えて、エントリー理由や学びのメモを記録。口座タイプや資産クラスごとに記録を分けて、体系的な管理が可能です。",
+    description: "売買日、価格、数量に加えて、エントリー理由や学びのメモを記録できます。口座タイプごとに記録を分けて、体系的な管理が可能です。",
   },
   {
     title: "自動保存で記録漏れゼロ",
@@ -14,14 +14,14 @@ const features = [
   },
   {
     title: "厳格なセキュリティ",
-    description: "Google 認証により、許可されたアカウントのみがアクセス可能。金融データを安全に保管し、個人情報の漏洩リスクを最小限に抑えます。",
+    description: "ログインにはGoogle 認証を導入。金融データを安全に保管し、個人情報の漏洩リスクを最小限に抑えます。",
   },
 ];
 
 const timeline = [
   { step: "01", title: "Google でサインイン", detail: "新規でメールアドレス・パスワードを入力することはありません。" },
-  { step: "02", title: "記録を作成", detail: "口座・資産クラス別にテンプレを用意。" },
-  { step: "03", title: "取引を記録", detail: "価格・数量・メモなどを一括入力。" },
+  { step: "02", title: "記録を作成", detail: "銘柄名や口座種別などを入力します。" },
+  { step: "03", title: "取引を記録", detail: "価格・数量・メモなどを入力します。" },
 ];
 
 const testimonials = [
@@ -71,7 +71,7 @@ export default function Home() {
                 トレードの記憶を、<br/>意思決定の資産へ。
               </h1>
               <p className="text-base text-white/80 md:text-lg">
-                取引を記録し、振り返り。<br/>投資家のための記録プラットフォーム。
+                取引を記録し、振り返る。<br/>投資家のための記録プラットフォーム。
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
