@@ -45,5 +45,5 @@ ENV = "production"
 [[env.production.d1_databases]]
 binding = "stock_journal_db"
 database_name = "stock_journal_db"
-database_id = "9bc4d628-e8cb-407f-970e-c4eca51be190"
+database_id = "39e3a3b6-772a-4678-8509-62c88fa176b9"
 migrations_dir = "drizzle/migrations"
