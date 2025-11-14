@@ -79,29 +79,38 @@ export async function middleware(req: NextRequest) {
     // process.env から取得を試みる
     policyAud = process.env.POLICY_AUD
     teamDomain = process.env.TEAM_DOMAIN
+    console.error('[middleware] Failed to get Cloudflare environment variables:', error)
   }
+
+  const isDevEnv = process.env.NODE_ENV !== 'production'
 
   if (!policyAud || !teamDomain) {
     const missingVars: string[] = []
     if (!policyAud) missingVars.push('POLICY_AUD')
     if (!teamDomain) missingVars.push('TEAM_DOMAIN')
-    
-    return new NextResponse(
-      JSON.stringify({
-        error: 'Configuration Error',
-        message: `Missing required environment variables: ${missingVars.join(', ')}`,
-        details: {
-          POLICY_AUD: policyAud ? 'set' : 'missing',
-          TEAM_DOMAIN: teamDomain ? 'set' : 'missing',
-        },
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+
+    if (isDevEnv) {
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Configuration Error',
+          message: `Missing required environment variables: ${missingVars.join(', ')}`,
+          details: {
+            POLICY_AUD: policyAud ? 'set' : 'missing',
+            TEAM_DOMAIN: teamDomain ? 'set' : 'missing',
+          },
+        }),
+        {
+          status: 500,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+    }
+
+    console.warn('[middleware] POLICY_AUD/TEAM_DOMAIN are missing in production runtime, redirecting to sign-in.')
+    const signInUrl = new URL('/signIn', req.url)
+    return NextResponse.redirect(signInUrl)
   }
 
   // JWTトークンを取得
