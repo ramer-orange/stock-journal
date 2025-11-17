@@ -69,20 +69,27 @@ export async function middleware(req: NextRequest) {
   // 環境変数のチェック（Cloudflare環境とローカル開発環境の両方に対応）
   let policyAud: string | undefined
   let teamDomain: string | undefined
+  let deploymentLabel: string | undefined
 
   try {
     const { env } = getCloudflareContext()
-    policyAud = (env as CloudflareEnv).POLICY_AUD as string | undefined
-    teamDomain = (env as CloudflareEnv).TEAM_DOMAIN as string | undefined
+    const cfEnv = env as CloudflareEnv
+    policyAud = cfEnv.POLICY_AUD as string | undefined
+    teamDomain = cfEnv.TEAM_DOMAIN as string | undefined
+    deploymentLabel = cfEnv.ENV as string | undefined
   } catch (error) {
     // ローカル開発環境では getCloudflareContext() が失敗する可能性があるため、
     // process.env から取得を試みる
     policyAud = process.env.POLICY_AUD
     teamDomain = process.env.TEAM_DOMAIN
+    deploymentLabel = process.env.ENV
     console.error('[middleware] Failed to get Cloudflare environment variables:', error)
   }
 
-  const isDevEnv = process.env.NODE_ENV !== 'production'
+  const isDevEnv =
+    deploymentLabel !== undefined
+      ? deploymentLabel !== 'production'
+      : process.env.NODE_ENV !== 'production'
 
   if (!policyAud || !teamDomain) {
     const missingVars: string[] = []
@@ -108,7 +115,6 @@ export async function middleware(req: NextRequest) {
       )
     }
 
-    console.warn('[middleware] POLICY_AUD/TEAM_DOMAIN are missing in production runtime, redirecting to sign-in.')
     const signInUrl = new URL('/signIn', req.url)
     return NextResponse.redirect(signInUrl)
   }
