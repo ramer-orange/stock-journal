@@ -69,52 +69,24 @@ export async function middleware(req: NextRequest) {
   // 環境変数のチェック（Cloudflare環境とローカル開発環境の両方に対応）
   let policyAud: string | undefined
   let teamDomain: string | undefined
-  let deploymentLabel: string | undefined
 
   try {
     const { env } = getCloudflareContext()
     const cfEnv = env as CloudflareEnv
     policyAud = cfEnv.POLICY_AUD as string | undefined
     teamDomain = cfEnv.TEAM_DOMAIN as string | undefined
-    deploymentLabel = cfEnv.ENV as string | undefined
   } catch (error) {
     // ローカル開発環境では getCloudflareContext() が失敗する可能性があるため、
     // process.env から取得を試みる
     policyAud = process.env.POLICY_AUD
     teamDomain = process.env.TEAM_DOMAIN
-    deploymentLabel = process.env.ENV
     console.error('[middleware] Failed to get Cloudflare environment variables:', error)
   }
 
-  const isDevEnv =
-    deploymentLabel !== undefined
-      ? deploymentLabel !== 'production'
-      : process.env.NODE_ENV !== 'production'
-
+  // Cloudflare Accessの環境変数が設定されていない場合
+  // 本番環境では環境変数が設定されていないため、Cloudflare Accessをスキップする
   if (!policyAud || !teamDomain) {
-    const missingVars: string[] = []
-    if (!policyAud) missingVars.push('POLICY_AUD')
-    if (!teamDomain) missingVars.push('TEAM_DOMAIN')
-
-    if (isDevEnv) {
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Configuration Error',
-          message: `Missing required environment variables: ${missingVars.join(', ')}`,
-          details: {
-            POLICY_AUD: policyAud ? 'set' : 'missing',
-            TEAM_DOMAIN: teamDomain ? 'set' : 'missing',
-          },
-        }),
-        {
-          status: 500,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-    }
-
+    // 環境変数が設定されていない場合は、Cloudflare Accessをスキップして、NextAuthのセッションがない場合のみサインインページにリダイレクト
     const signInUrl = new URL('/signIn', req.url)
     return NextResponse.redirect(signInUrl)
   }
