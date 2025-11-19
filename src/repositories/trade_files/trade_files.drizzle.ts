@@ -32,7 +32,7 @@ export const getTradeFiles = async (tradeId: number): Promise<{ fileRows: TradeF
  * @param tradeFile
  * @returns
  */
-export const createTradeFile = async (tradeFile: TradeFileRow) => {
+export const createTradeFile = async (tradeFile: Pick<TradeFileRow, 'tradeId' | 'r2Key'>) => {
   const { db } = await getRepoContext();
   // バリデーション実行
   const validationResult = tradeFileInputSchema.safeParse(tradeFile);

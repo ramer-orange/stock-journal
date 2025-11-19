@@ -1,7 +1,6 @@
 'use client';
 
 import { createTradeFileAction, getTradeFilesAction, deleteTradeFileAction } from "@/app/(main)/journals/_actions/tradeFileActions";
-import type { TradeFileRow } from "@/types/tradeFiles";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
@@ -21,7 +20,7 @@ export default function TradeFileForm({ tradeId }: Props) {
         return;
       }
 
-      // trade_filesテーブルから取得したr2Keyを使って、GETエンドポイントのURLを生成
+      // DBから取得したr2Keyを使って、GETエンドポイントのURLを生成
       const fileUrls = result.fileRows.map((fileRow) => ({
         id: fileRow.id,
         r2Key: fileRow.r2Key,
@@ -44,29 +43,30 @@ export default function TradeFileForm({ tradeId }: Props) {
       return;
     }
     
-    // ファイルをR2にアップロード
-    const response = await fetch("/api/fileUpload", {
-      method: "PUT",
-      body: file,
-    });
-    if (!response.ok) {
-      console.error("Failed to upload file");
-      return;
-    }
-    
-    // responseのデータを取得
-    const data = await response.json() as { r2Key: string };
-    
-    // tradeFilesテーブルにデータを保存
-    const result = await createTradeFileAction({
-      tradeId,
-      r2Key: data.r2Key,
-    } as TradeFileRow);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tradeId', String(tradeId));
+
+    // Server Actionを呼び出し (R2アップロード + DB保存)
+    const result = await createTradeFileAction(formData);
     
     if (!result.success) {
       console.error("Failed to upsert trade file", result.errors);
+      alert("アップロードに失敗しました");
       return;
     }
+
+    // 成功したらstateを更新
+    if (result.success) {
+      setTradeFiles(prev => [...prev, {
+        id: result.id,
+        r2Key: result.r2Key,
+        fileUrl: `/api/fileUpload?key=${encodeURIComponent(result.r2Key)}`
+      }]);
+    }
+
+    // inputをクリア
+    e.target.value = '';
   };
 
   // 取引ファイルの削除処理

@@ -2,7 +2,7 @@ import { createTradeFile, getTradeFiles, deleteTradeFile } from "./trade_files.d
 import type { TradeFileRow } from "@/types/tradeFiles";
 
 export interface TradeFilesRepository {
-  createTradeFile: (tradeFile: TradeFileRow) => Promise<{
+  createTradeFile: (tradeFile: Pick<TradeFileRow, 'tradeId' | 'r2Key'>) => Promise<{
     id?: number;
     r2Key?: string;
     errors?: {
@@ -15,7 +15,7 @@ export interface TradeFilesRepository {
 }
 
 export function getTradeFilesRepo(): TradeFilesRepository {
-  return {  
+  return {
     createTradeFile,
     getTradeFiles,
     deleteTradeFile,

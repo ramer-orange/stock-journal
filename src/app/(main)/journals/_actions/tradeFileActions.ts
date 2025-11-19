@@ -2,14 +2,15 @@
 
 import { getTradeFilesRepo } from "@/repositories/trade_files";
 import type { TradeFileRow } from "@/types/tradeFiles";
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 
 // 取引ファイルの一覧取得時の型
 type GetTradeFilesActionResult =
   | { success: true, fileRows: TradeFileRow[] }
   | { success: false, errors: Record<string, string[]> };
 
-// 取引ファイルのupsert時の型
-type UpsertTradeFileActionResult =
+// 取引ファイルのアップロード時の型
+type UploadTradeFileActionResult =
   | { success: true; id: number, r2Key: string; }
   | { success: false; errors: Record<string, string[]> };
 
@@ -30,18 +31,40 @@ export async function getTradeFilesAction(tradeId: number): Promise<GetTradeFile
 }
 
 // 取引ファイルの作成処理
-export async function createTradeFileAction(tradeFile: TradeFileRow): Promise<UpsertTradeFileActionResult> {
+export async function createTradeFileAction(formData: FormData): Promise<UploadTradeFileActionResult> {
   try {
-    const result = await getTradeFilesRepo().createTradeFile(tradeFile);
+    const file = formData.get('file') as File;
+    const tradeId = Number(formData.get('tradeId'));
 
+    if (!file || !tradeId) {
+      return { success: false, errors: { formErrors: ["ファイルまたは取引IDが不足しています。"] } };
+    }
+
+    const { env } = getCloudflareContext();
+    const r2Key = `trade-files/${crypto.randomUUID()}`;
+
+    // R2にアップロード
+    const arrayBuffer = await file.arrayBuffer(); // リクエスト本体をバイナリデータとして読み込む
+    await env.R2_DEV.put(r2Key, arrayBuffer, {
+      httpMetadata: {
+        contentType: file.type,
+      },
+    });
+
+    // DBに保存
+    const result = await getTradeFilesRepo().createTradeFile({ tradeId, r2Key });
+
+    // DB保存に失敗した場合、R2からファイルを削除（ロールバック）
     if (result?.errors) {
+      await env.R2_DEV.delete(r2Key);
       return {
         success: false,
         errors: result.errors.fieldErrors,
       };
     }
-
+    // ID等が返ってこない場合も失敗とみなして削除
     if (!result.id || !result.r2Key) {
+      await env.R2_DEV.delete(r2Key);
       return { success: false, errors: { formErrors: ["保存に失敗しました。"] } };
     }
 
@@ -65,15 +88,8 @@ export async function deleteTradeFileAction(id: number, r2Key: string): Promise<
     }
 
     // R2からファイルを削除
-    const response = await fetch(`/api/fileUpload?key=${encodeURIComponent(r2Key)}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      return {
-        success: false,
-        errors: { formErrors: ["削除に失敗しました。"] },
-      };
-    }
+    const { env } = getCloudflareContext();
+    await env.R2_DEV.delete(r2Key);
 
     return { success: true };  
   } catch (error) {
