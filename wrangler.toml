@@ -18,6 +18,10 @@ database_name = "stock_journal_dev"
 database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
 migrations_dir = "drizzle/migrations"
 
+[[r2_buckets]]
+binding = 'R2_DEV'
+bucket_name = 'stock-journal-r2-dev'
+
 [vars]
 AUTH_URL = "https://stock-journal-dev.stock-journal.workers.dev"
 ENV = "dev"

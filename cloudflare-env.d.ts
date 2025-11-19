@@ -13,6 +13,7 @@ declare namespace Cloudflare {
 		AUTH_SECRET?: string;
 		POLICY_AUD?: string;
 		TEAM_DOMAIN?: string;
+		R2_DEV: R2Bucket;
 	}
 }
 interface CloudflareEnv extends Cloudflare.Env {}

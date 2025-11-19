@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Badge } from "@/components/ui/Badge";
 import { upsertTradeAction } from "@/app/(main)/journals/_actions/tradeActions";
 import { TradeClient } from "@/types/trades";
+import TradeFileForm from "@/app/(main)/journals/_components/tradeFiles/tradeFileForm";
 
 type Props = {
   journalId: number;
@@ -218,6 +219,7 @@ export default function TradeForm({ journalId, tradeData, onDelete }: Props) {
       </div>
 
       <ErrorMessage messages={actionError?.[trade.id]} className="mt-1" />
+      <TradeFileForm tradeId={trade.id}/>
     </section>
   );
 }
