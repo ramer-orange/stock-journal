@@ -21,8 +21,22 @@ migrations_dir = "drizzle/migrations"
 [vars]
 AUTH_URL = "https://stock-journal-dev.stock-journal.workers.dev"
 ENV = "dev"
+
+[env.dev]
+name = "stock-journal-dev"
+workers_dev = true
+
+[env.dev.vars]
+AUTH_URL = "https://stock-journal-dev.stock-journal.workers.dev"
+ENV = "dev"
 POLICY_AUD = "4e0b4814dc40245715e4afd61ffc9562d99baf877b079f559fd3a4962989379a"
 TEAM_DOMAIN = "https://orangekai.cloudflareaccess.com"
+
+[[env.dev.d1_databases]]
+binding = "stock_journal_db"
+database_name = "stock_journal_dev"
+database_id = "b06a5523-8cc0-42ce-952c-5d1f03389a8a"
+migrations_dir = "drizzle/migrations"
 
 [env.production]
 name = "stock-journal-production"
