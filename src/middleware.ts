@@ -42,90 +42,106 @@ function getJWKS(teamDomain: string): ReturnType<typeof createRemoteJWKSet> {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
-  const requiresAuth = isProtectedPath(pathname)
-
-  // 保護対象パスでない場合はそのまま通過
-  if (!requiresAuth) {
-    const response = NextResponse.next()
-    response.headers.set('x-pathname', pathname)
-    return response
-  }
-
-  // NextAuthのセッションをチェック
   try {
-    const session = await auth()
-    if (session) {
-      // NextAuthのセッションがある場合はそのまま通過
+    const { pathname } = req.nextUrl
+    const requiresAuth = isProtectedPath(pathname)
+
+    // 保護対象パスでない場合はそのまま通過
+    if (!requiresAuth) {
       const response = NextResponse.next()
       response.headers.set('x-pathname', pathname)
       return response
     }
-  } catch (error) {
-    // セッション取得に失敗した場合はCloudflare Accessのチェックに進む
-    console.error('[middleware] Failed to get NextAuth session:', error)
-  }
 
-  // 環境変数のチェック（Cloudflare環境とローカル開発環境の両方に対応）
-  let policyAud: string | undefined
-  let teamDomain: string | undefined
-
-  try {
-    const { env } = getCloudflareContext()
-    const cfEnv = env as CloudflareEnv
-    policyAud = cfEnv.POLICY_AUD as string | undefined
-    teamDomain = cfEnv.TEAM_DOMAIN as string | undefined
-  } catch (error) {
-    // ローカル開発環境では getCloudflareContext() が失敗する可能性があるため、
-    // process.env から取得を試みる
-    policyAud = process.env.POLICY_AUD
-    teamDomain = process.env.TEAM_DOMAIN
-    console.error('[middleware] Failed to get Cloudflare environment variables:', error)
-  }
-
-  // Cloudflare Accessの環境変数が設定されていない場合
-  // 本番環境では環境変数が設定されていないため、Cloudflare Accessをスキップする
-  if (!policyAud || !teamDomain) {
-    // 環境変数が設定されていない場合は、Cloudflare Accessをスキップして、NextAuthのセッションがない場合のみサインインページにリダイレクト
-    const signInUrl = new URL('/signIn', req.url)
-    return NextResponse.redirect(signInUrl)
-  }
-
-  // JWTトークンを取得
-  const jwt =
-    req.cookies.get('CF_Authorization')?.value ||
-    req.headers.get('cf-access-jwt-assertion')
-
-  if (!jwt) {
-    // トークンがない場合はCloudflare Accessのログインページにリダイレクト
-    const loginUrl = `${teamDomain}/cdn-cgi/access/login`
-    return NextResponse.redirect(loginUrl)
-  }
-
-  // JWKSを取得
-  const JWKS = getJWKS(teamDomain)
-
-  try {
-    // JWTを検証
-    const { payload } = await jwtVerify(jwt, JWKS, {
-      issuer: teamDomain,
-      audience: policyAud,
-    })
-
-    // 検証成功 - リクエストを続行
-    const response = NextResponse.next()
-    response.headers.set('x-pathname', pathname)
-
-    // JWTペイロードのemailをヘッダーに設定（必要に応じて）
-    if (payload.email && typeof payload.email === 'string') {
-      response.headers.set('x-cf-access-email', payload.email)
+    // NextAuthのセッションをチェック
+    try {
+      const session = await auth()
+      if (session) {
+        // NextAuthのセッションがある場合はそのまま通過
+        const response = NextResponse.next()
+        response.headers.set('x-pathname', pathname)
+        return response
+      }
+    } catch (error) {
+      // セッション取得に失敗した場合はCloudflare Accessのチェックに進む
+      console.error('[middleware] Failed to get NextAuth session:', error)
     }
 
-    return response
-  } catch {
-    // 検証失敗時はCloudflare Accessのログインページにリダイレクト
-    const loginUrl = `${teamDomain}/cdn-cgi/access/login`
-    return NextResponse.redirect(loginUrl)
+    // 環境変数のチェック（Cloudflare環境とローカル開発環境の両方に対応）
+    let policyAud: string | undefined
+    let teamDomain: string | undefined
+    let envName: string | undefined
+
+    try {
+      const { env } = getCloudflareContext()
+      const cfEnv = env as CloudflareEnv
+      policyAud = cfEnv.POLICY_AUD as string | undefined
+      teamDomain = cfEnv.TEAM_DOMAIN as string | undefined
+      envName = cfEnv.ENV as string | undefined
+    } catch (error) {
+      // ローカル開発環境では getCloudflareContext() が失敗する可能性があるため、
+      // process.env から取得を試みる
+      policyAud = process.env.POLICY_AUD
+      teamDomain = process.env.TEAM_DOMAIN
+      envName = process.env.ENV
+      console.error('[middleware] Failed to get Cloudflare environment variables:', error)
+    }
+
+    // 本番環境で変数が設定されていない場合は、Cloudflare Accessをスキップ
+    if (envName === 'production' && (!policyAud || !teamDomain)) {
+      // NextAuthのセッションがない（上のチェックで確認済み）のでサインインへ
+      const signInUrl = new URL('/signIn', req.url)
+      return NextResponse.redirect(signInUrl)
+    }
+
+    // Cloudflare Accessの環境変数が設定されていない場合
+    if (!policyAud || !teamDomain) {
+      // 環境変数が設定されていない場合は、Cloudflare Accessをスキップして、NextAuthのセッションがない場合のみサインインページにリダイレクト
+      const signInUrl = new URL('/signIn', req.url)
+      return NextResponse.redirect(signInUrl)
+    }
+
+    // JWTトークンを取得
+    const jwt =
+      req.cookies.get('CF_Authorization')?.value ||
+      req.headers.get('cf-access-jwt-assertion')
+
+    if (!jwt) {
+      // トークンがない場合はCloudflare Accessのログインページにリダイレクト
+      const loginUrl = `${teamDomain}/cdn-cgi/access/login`
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // JWKSを取得
+    const JWKS = getJWKS(teamDomain)
+
+    try {
+      // JWTを検証
+      const { payload } = await jwtVerify(jwt, JWKS, {
+        issuer: teamDomain,
+        audience: policyAud,
+      })
+
+      // 検証成功 - リクエストを続行
+      const response = NextResponse.next()
+      response.headers.set('x-pathname', pathname)
+
+      // JWTペイロードのemailをヘッダーに設定（必要に応じて）
+      if (payload.email && typeof payload.email === 'string') {
+        response.headers.set('x-cf-access-email', payload.email)
+      }
+
+      return response
+    } catch {
+      // 検証失敗時はCloudflare Accessのログインページにリダイレクト
+      const loginUrl = `${teamDomain}/cdn-cgi/access/login`
+      return NextResponse.redirect(loginUrl)
+    }
+  } catch (error) {
+    console.error('[middleware] Unexpected error:', error)
+    // 予期せぬエラーが発生した場合はサインインページへリダイレクト（安全側）
+    const signInUrl = new URL('/signIn', req.url)
+    return NextResponse.redirect(signInUrl)
   }
 }
 
